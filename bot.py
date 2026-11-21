@@ -44,6 +44,9 @@ PARAMS = {
     "ph_prac_t": 45.0, "ph_prac_cubes": 2.0, "ph_ffa_alive": 6.0, "ph_loot_w": 1.3,
     # C5 "heal": start healing under heal_lo, stop at heal_hi; don't start fights under heal_start
     "heal_lo": 0.5, "heal_hi": 0.9, "heal_start": 0.7,
+    # X10 profile: easy kills (hp under easy_hp, within easy_d, back turned, or shooting us); harvest until a second
+    # weapon and harvest_cubes cubes; heal threshold rises to heal_lo_late once the zone is small
+    "easy_hp": 0.4, "easy_d": 45.0, "harvest_cubes": 2.0, "heal_lo_late": 0.5,
 }
 
 # Named versions -> behaviour switches. A1 is the original v1 (git commit f2c923f), not reproducible by switches.
@@ -79,8 +82,29 @@ VERSIONS = {
     "C7": "gunwise",            # laser kiting: hold 120-150 m with a laser
     "C8": "gunwise,dodge",      # sidestep charging lasers aimed at us and incoming mortar shells
     "C9": "gunwise,heal",       # C5 + C6: heal between fights, and one fight at a time
+    "E1": "gunwise,dodge,heal",          # C8 (best real 3.88) + heal between fights
+    "E2": "gunwise,dodge",               # C8 + Z100 tuner's settings
+    "E3": "gunwise,dodge,dodgeb",        # C8 + dodge bullets too
     "D1": "gunwise",            # A9, fight harder: retreat only when nearly dead or swarmed
     "D2": "gunwise,econ",       # A9 + economy loop: farm wider, opportunistic shots at crates and drones
+    "X10": "gunwise,econ,harvest,easy,heal,crowd,calmlate",  # profile: loot first, easy kills, heal at 40% (65% late), avoid being focused, calm late game
+    "X11": "gunwise,econ,harvest,easy,heal,crowd,calmlate,dodge",  # X10 + dodge
+    "X12": "gunwise,econ,harvest,heal,crowd,calmlate",  # X10 without easy-kills-only
+    "X13": "gunwise,econ,easy,heal,crowd,calmlate",  # X10 without the harvest phase
+    "X14": "gunwise,econ,harvest,easy,crowd,calmlate",  # X10 without healing
+    "X15": "gunwise,econ,harvest,easy,heal,calmlate",  # X10 without the crowd rule
+    "X16": "gunwise,econ,harvest,easy,heal,crowd",  # X10 without the calm late game
+    "X17": "gunwise,econ,dodge",  # D2 + dodge
+    "X18": "gunwise,econ,heal",  # D2 + heal (40%, 65% late)
+    "X19": "gunwise,econ,crowd",  # D2 + crowd rule
+    "X20": "gunwise,econ,heal,crowd",  # D2 + heal + crowd
+    "X21": "gunwise,econ,heal,crowd,dodge",  # X20 + dodge
+    "X22": "gunwise,econ,heal,crowd,calmlate",  # X20 + calm late game
+    "X23": "gunwise,econ,heal,crowd",  # X20, heal from 30%
+    "X24": "gunwise,econ,heal,crowd",  # X20, no late-game heal raise
+    "X25": "gunwise,econ,heal,crowd",  # X20, shorter heal (to 75%)
+    "X26": "gunwise,econ,heal,crowd,harvest",  # X20 + harvest phase
+    "X27": "gunwise,econ,crowd,dodge",  # D2 + crowd + dodge
 }
 # Per-version setting overrides, applied on top of PARAMS (SURVIVOR_PARAMS still overrides both).
 VERSION_PARAMS = {
@@ -97,8 +121,8 @@ VERSION_PARAMS = {
     "B7": {"end_flee_hp1": 0.5, "end_flee_hp2": 0.7},
 }
 VERSION_PARAMS.update({"C1": VERSION_PARAMS["B4"], "C2": VERSION_PARAMS["B5"], "C3": VERSION_PARAMS["B6"], "C4": VERSION_PARAMS["B7"],
-                       "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "D1": {"flee_hp1": 0.2, "flee_hp2": 0.3, "flee_natt": 3, "flee_nlos": 4}, "D2": {"crate_range": 150, "loot_c_range": 110}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
-DEFAULT_VERSION = "D2"
+                       "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "D1": {"flee_hp1": 0.2, "flee_hp2": 0.3, "flee_natt": 3, "flee_nlos": 4}, "D2": {"crate_range": 150, "loot_c_range": 110}, "E2": VERSION_PARAMS["B6"], "X20": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X21": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X22": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X23": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.3, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X24": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.4}, "X25": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.75, "heal_lo_late": 0.65}, "X26": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X27": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X10": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X11": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X12": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X13": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X14": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X15": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X16": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X17": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X18": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X19": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
+DEFAULT_VERSION = "E2"
 
 
 def load_params(version=None):
@@ -448,7 +472,9 @@ class Bot:
         def hit_us(m, within):
             return m["id"] in self.attackers and t - self.attackers[m["id"]] < within
 
-        selective = bool(self.flags & {"pick", "flank", "ambush"})
+        kitted = all(kinds) and any(k and k != "gun" for k in kinds) and me.get("cubes", 0) >= P["harvest_cubes"]
+        harvesting = "harvest" in self.flags and self.stage == "early" and not kitted
+        selective = bool(self.flags & {"pick", "flank", "ambush", "easy"}) or harvesting
         if "flank" in self.flags:
             # A7: go for any back we can shoot; anyone else only if it is already shooting us or is point blank
             cands = [m for m in mechs if hit_us(m, 4) or (m["los"] and (m["back"] or m["d"] < 35))]
@@ -459,6 +485,10 @@ class Bot:
             def alone(m):
                 return all(math.dist(o["pos"][:2], m["pos"][:2]) > 70 for o in mechs if o is not m)
             cands = [m for m in mechs if len(seen_us) <= 1 and ((m["los"] and m["back"] and alone(m)) or hit_us(m, 3))]
+        elif "easy" in self.flags or harvesting:
+            def easy(m):
+                return hit_us(m, 4) or m["d"] < P["easy_d"] or (m["los"] and (m["hp"] < P["easy_hp"] * m.get("max_hp", 1400) or m["back"]))
+            cands = [m for m in mechs if easy(m)]
         elif "pick" in self.flags:
             cands = [m for m in mechs if threatening(m)]
         else:
@@ -475,7 +505,7 @@ class Bot:
         close_enemies = [m for m in mechs if m["d"] < 120]
 
         if "heal" in self.flags:
-            if hp_frac < P["heal_lo"]:
+            if hp_frac < (P["heal_lo_late"] if self.stage == "late" else P["heal_lo"]):
                 self.healing = True
             elif hp_frac >= P["heal_hi"]:
                 self.healing = False
@@ -532,6 +562,8 @@ class Bot:
                 # B7: from mid-game, bank HP for the last circles: break off sooner
                 if hp_frac < P["end_flee_hp1"] or (hp_frac < P["end_flee_hp2"] and target["hp"] > me["hp"]):
                     losing = True
+            if "crowd" in self.flags and n_los >= 2 and any(t - tt < 3 for tt in self.attackers.values()):
+                losing = True   # X10: 2+ enemies have a line on us and we are the one being shot: get out
             if "heal" in self.flags:
                 engaged = target["id"] in self.attackers and t - self.attackers[target["id"]] < 3
                 if self.healing and not (target["d"] < 30 and engaged):
@@ -560,7 +592,7 @@ class Bot:
             else:
                 radial = 0.0
                 if target["d"] > want_hi:
-                    radial = 0.0 if ("endgame" in self.flags and self.stage == "late") else P["radial"]   # B7: don't chase late
+                    radial = 0.0 if (("endgame" in self.flags or "calmlate" in self.flags) and self.stage == "late") else P["radial"]   # don't chase late
                 elif target["d"] < want_lo:
                     radial = -P["radial"]
                 move = (px + bx * radial, py + by * radial)
@@ -726,6 +758,25 @@ class Bot:
             if abs(side) < 2.5 * (1 + 0.05 * me.get("cubes", 0)) + 2.0:
                 sgn = 1.0 if side >= 0 else -1.0
                 return (-dy * sgn, dx * sgn)
+        if "dodgeb" in self.flags:
+            rad = 2.5 * (1 + 0.05 * me.get("cubes", 0))
+            for p in obs.get("projectiles", []):
+                if p.get("kind") not in ("gun", "npc"):
+                    continue
+                (px, py, pz), (vx, vy, vz) = p["pos"], p["vel"]
+                v2 = vx * vx + vy * vy
+                if v2 < 1:
+                    continue
+                tc = ((x - px) * vx + (y - py) * vy) / v2   # time of closest approach
+                if not 0 < tc < 0.45:
+                    continue
+                cx, cy = px + vx * tc - x, py + vy * tc - y
+                if math.hypot(cx, cy) < rad + 1.0 and z - 0.5 < pz + vz * tc < z + 9.5:
+                    sp = math.sqrt(v2)
+                    nx, ny = -vy / sp, vx / sp   # perpendicular to the bullet, away from its line
+                    if nx * (-cx) + ny * (-cy) < 0:
+                        nx, ny = -nx, -ny
+                    return (nx, ny)
         g = self.wcfg["mortar"].get("gravity", 22)
         splash = self.wcfg["mortar"].get("splash_radius", 7)
         for p in obs.get("projectiles", []):
