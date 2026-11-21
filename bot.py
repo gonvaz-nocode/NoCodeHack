@@ -97,6 +97,10 @@ VERSIONS = {
     "G4": "gunwise,dodge,holdspot",           # C8 + fight from the pre-chosen covered spot when the target is in range
     "G5": "gunwise,dodge,adapt",              # C8 + learn press vs space during the match (damage out - in)
     "G6": "gunwise,dodge,holdspot,adapt",     # G4 + G5
+    "K1": "gunwise,dodge,holdspot,midcube",                          # G4 + grab cubes / a special mid-fight
+    "K2": "gunwise,dodge,holdspot,precharge",                        # G4 + laser pre-charge on tracked targets
+    "K3": "gunwise,dodge,holdspot,midcube,precharge",                # K1 + K2
+    "K4": "gunwise,dodge,holdspot,midcube,precharge,repair,memory",  # K3 + I3 (repair + loot memory)
     "J1": "gunwise,dodge,holdspot,sprint",           # G4 + fast opening loot sweep
     "J2": "gunwise,dodge,holdspot",                  # G4 + close gun brawler: gun 20-40 m, retreat at 15% HP
     "J3": "gunwise,dodge,holdspot,repair,sprint",    # I1 + fast opening
@@ -148,7 +152,7 @@ VERSION_PARAMS = {
 }
 VERSION_PARAMS.update({"C1": VERSION_PARAMS["B4"], "C2": VERSION_PARAMS["B5"], "C3": VERSION_PARAMS["B6"], "C4": VERSION_PARAMS["B7"],
                        "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "D1": {"flee_hp1": 0.2, "flee_hp2": 0.3, "flee_natt": 3, "flee_nlos": 4}, "D2": {"crate_range": 150, "loot_c_range": 110}, "E2": VERSION_PARAMS["B6"], "G2": {"zone_lead": 60}, "H2": {"zone_lead": 60}, "J2": {"rng_gun_lo": 20, "rng_gun_hi": 40, "flee_hp1": 0.15, "flee_hp2": 0.2, "ts_nolos": 20}, "H4": {"hold_range": 1.4}, "G3": {"zone_lead": 60}, "F1": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "F2": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.35, "bz_back": 0.6}, "F3": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "X20": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X21": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X22": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X23": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.3, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X24": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.4}, "X25": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.75, "heal_lo_late": 0.65}, "X26": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X27": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X10": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X11": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X12": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X13": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X14": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X15": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X16": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X17": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X18": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X19": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
-DEFAULT_VERSION = "J4"
+DEFAULT_VERSION = "K1"
 
 
 def load_params(version=None):
@@ -702,6 +706,16 @@ class Bot:
                 boost = me["energy"] > P["fight_boost_e"] and target["d"] < P["fight_boost_d"]
                 if bold:
                     boost = me["energy"] > 25
+            if "midcube" in self.flags:
+                lim = 12 if losing else (70 if hp_frac > 0.5 else 40)
+                cubes = [c for c in obs.get("cubes", []) if d2(c["pos"], (x, y)) < lim and abs(c["pos"][2] - z) < 3]
+                grab = min(cubes, key=lambda c: d2(c["pos"], (x, y)))["pos"] if cubes else None
+                if grab is None and not losing and not any(k in ("laser", "lightning") for k in kinds):
+                    sp = [p for p in obs.get("pickups", []) if p["kind"] in ("laser", "lightning") and d2(p["pos"], (x, y)) < 60
+                          and abs(p["pos"][2] - z) < 3]
+                    grab = min(sp, key=lambda p: d2(p["pos"], (x, y)))["pos"] if sp else None
+                if grab is not None and d2(grab, (x, y)) > 1.5:
+                    move, _ = self.nav_to(me, grab[0], grab[1]); tag += "+"
             if need_zone and (not in_zone or dcur > cur_r - 15):
                 zv, _ = self.nav_to(me, self.hide[0], self.hide[1])
                 move = (zv[0] * 1.0 + move[0] * 0.4, zv[1] * 1.0 + move[1] * 0.4)
@@ -1350,6 +1364,8 @@ class Bot:
                             fire[i] = not on
                 elif chg > 0:
                     fire[i] = chg < full + 1.6  # wait for line of sight
+                elif "precharge" in self.flags and dist < 60 and w["cooldown"] <= 0.05:
+                    fire[i] = True   # K2: be charged when it steps back into view
             elif k == "lightning":
                 cone = math.radians(st.get("cone_deg", 30)) * 0.45
                 if los and dist < st["range"] * 0.95 and w["cooldown"] <= 0.1 and me["energy"] > st.get("energy", 3) + 6:
