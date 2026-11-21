@@ -101,6 +101,11 @@ VERSIONS = {
     "G4": "gunwise,dodge,holdspot",           # C8 + fight from the pre-chosen covered spot when the target is in range
     "G5": "gunwise,dodge,adapt",              # C8 + learn press vs space during the match (damage out - in)
     "G6": "gunwise,dodge,holdspot,adapt",     # G4 + G5
+    "AE1": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,gunlaser",  # AC3 + gun fires with lead while the laser charges
+    "AE2": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,cubecap",  # AC3 + stop chasing cubes past 10
+    "AE3": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,gunlaser,cubecap",  # AE1 + AE2
+    "AE4": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,dual,gunlaser",  # MUSHIN-DUAL + gun fires while the laser charges
+    "DUAL": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,dual",  # AC3 in practice, MUSHIN-UI v2 once a free-for-all is detected
     "AD1": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,pushhold",  # T2 + hold the corner when an enemy pushes us
     "AD2": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,flank",  # T2 + flank: prefer enemies whose back is to us
     "AD3": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,thirdparty,pushhold",  # AC4 + hold the corner when pushed
@@ -223,8 +228,8 @@ VERSION_PARAMS = {
     "B7": {"end_flee_hp1": 0.5, "end_flee_hp2": 0.7},
 }
 VERSION_PARAMS.update({"C1": VERSION_PARAMS["B4"], "C2": VERSION_PARAMS["B5"], "C3": VERSION_PARAMS["B6"], "C4": VERSION_PARAMS["B7"],
-                       "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "D1": {"flee_hp1": 0.2, "flee_hp2": 0.3, "flee_natt": 3, "flee_nlos": 4}, "D2": {"crate_range": 150, "loot_c_range": 110}, "E2": VERSION_PARAMS["B6"], "G2": {"zone_lead": 60}, "H2": {"zone_lead": 60}, "L4": {"rep_lo": 0.6, "rep_hi": 0.95, "rep_kill": 10}, "M1": {"rep_lo": 0.6, "rep_hi": 0.95, "rep_kill": 10}, "AD1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AD2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AD3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AD4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AC1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AC2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AC3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AC4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AB1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 60, "tp_lo": 50, "tp_hi": 110}, "AB2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 60, "tp_lo": 35, "tp_hi": 80}, "AB3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AB4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 60, "tp_lo": 70, "tp_hi": 140}, "Z1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "Z2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "Z3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "Z4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "Y1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 30, "rng_gun_hi": 70}, "Y2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 25, "rng_gun_hi": 85}, "Y3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 40, "rng_gun_hi": 100}, "Y4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 30, "rng_gun_hi": 85}, "W1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 20, "rng_gun_hi": 55}, "W2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 35, "rng_gun_hi": 85}, "W3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "flee_hp1": 0.25, "flee_hp2": 0.4}, "W4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "flee_hp1": 0.45, "flee_hp2": 0.6}, "V1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "V2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "V3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "V4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "U1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.1}, "U2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.0}, "U3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "U4": {"rep_lo": 0.65, "rep_hi": 1.0, "rep_kill": 12, "hold_range": 1.2}, "T1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "T2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "T3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "T4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 25, "hold_range": 1.3}, "S1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "S2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.4}, "S3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "S4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 25, "hold_range": 1.3}, "R1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.5}, "R2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.8}, "R3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "R4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3, "crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "Q1": {"rep_lo": 0.8, "rep_hi": 1.0, "rep_kill": 25}, "Q2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "Q3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15}, "Q4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15}, "P1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15}, "P2": {"rep_lo": 0.65, "rep_hi": 1.0, "rep_kill": 12}, "P3": {"rep_lo": 0.7, "rep_hi": 1.0, "rep_kill": 12, "crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "P4": {"rep_lo": 0.85, "rep_hi": 1.0, "rep_kill": 20}, "O1": {"rep_lo": 0.65, "rep_hi": 1.0, "rep_kill": 12}, "O2": {"rep_lo": 0.6, "rep_hi": 0.95, "rep_kill": 10, "crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "O3": {"rep_lo": 0.6, "rep_hi": 0.95, "rep_kill": 10}, "O4": {"rep_lo": 0.65, "rep_hi": 1.0, "rep_kill": 12, "crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "N1": {"crate_range": 150, "crate_hp": 0.45}, "N2": {"loot_c_range": 150, "loot_c_bonus": 30}, "N4": {"crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "J2": {"rng_gun_lo": 20, "rng_gun_hi": 40, "flee_hp1": 0.15, "flee_hp2": 0.2, "ts_nolos": 20}, "H4": {"hold_range": 1.4}, "G3": {"zone_lead": 60}, "F1": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "F2": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.35, "bz_back": 0.6}, "F3": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "X20": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X21": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X22": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X23": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.3, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X24": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.4}, "X25": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.75, "heal_lo_late": 0.65}, "X26": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X27": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X10": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X11": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X12": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X13": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X14": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X15": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X16": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X17": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X18": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X19": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
-DEFAULT_VERSION = "AD4"
+                       "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "D1": {"flee_hp1": 0.2, "flee_hp2": 0.3, "flee_natt": 3, "flee_nlos": 4}, "D2": {"crate_range": 150, "loot_c_range": 110}, "E2": VERSION_PARAMS["B6"], "G2": {"zone_lead": 60}, "H2": {"zone_lead": 60}, "L4": {"rep_lo": 0.6, "rep_hi": 0.95, "rep_kill": 10}, "M1": {"rep_lo": 0.6, "rep_hi": 0.95, "rep_kill": 10}, "AE1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AE2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AE3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AE4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "DUAL": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AD1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AD2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AD3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AD4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AC1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AC2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AC3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AC4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AB1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 60, "tp_lo": 50, "tp_hi": 110}, "AB2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 60, "tp_lo": 35, "tp_hi": 80}, "AB3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AB4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 60, "tp_lo": 70, "tp_hi": 140}, "Z1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "Z2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "Z3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "Z4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "Y1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 30, "rng_gun_hi": 70}, "Y2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 25, "rng_gun_hi": 85}, "Y3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 40, "rng_gun_hi": 100}, "Y4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 30, "rng_gun_hi": 85}, "W1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 20, "rng_gun_hi": 55}, "W2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 35, "rng_gun_hi": 85}, "W3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "flee_hp1": 0.25, "flee_hp2": 0.4}, "W4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "flee_hp1": 0.45, "flee_hp2": 0.6}, "V1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "V2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "V3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "V4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "U1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.1}, "U2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.0}, "U3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "U4": {"rep_lo": 0.65, "rep_hi": 1.0, "rep_kill": 12, "hold_range": 1.2}, "T1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "T2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "T3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "T4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 25, "hold_range": 1.3}, "S1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "S2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.4}, "S3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "S4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 25, "hold_range": 1.3}, "R1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.5}, "R2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.8}, "R3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "R4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3, "crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "Q1": {"rep_lo": 0.8, "rep_hi": 1.0, "rep_kill": 25}, "Q2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "Q3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15}, "Q4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15}, "P1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15}, "P2": {"rep_lo": 0.65, "rep_hi": 1.0, "rep_kill": 12}, "P3": {"rep_lo": 0.7, "rep_hi": 1.0, "rep_kill": 12, "crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "P4": {"rep_lo": 0.85, "rep_hi": 1.0, "rep_kill": 20}, "O1": {"rep_lo": 0.65, "rep_hi": 1.0, "rep_kill": 12}, "O2": {"rep_lo": 0.6, "rep_hi": 0.95, "rep_kill": 10, "crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "O3": {"rep_lo": 0.6, "rep_hi": 0.95, "rep_kill": 10}, "O4": {"rep_lo": 0.65, "rep_hi": 1.0, "rep_kill": 12, "crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "N1": {"crate_range": 150, "crate_hp": 0.45}, "N2": {"loot_c_range": 150, "loot_c_bonus": 30}, "N4": {"crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "J2": {"rng_gun_lo": 20, "rng_gun_hi": 40, "flee_hp1": 0.15, "flee_hp2": 0.2, "ts_nolos": 20}, "H4": {"hold_range": 1.4}, "G3": {"zone_lead": 60}, "F1": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "F2": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.35, "bz_back": 0.6}, "F3": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "X20": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X21": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X22": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X23": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.3, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X24": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.4}, "X25": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.75, "heal_lo_late": 0.65}, "X26": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X27": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X10": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X11": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X12": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X13": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X14": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X15": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X16": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X17": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X18": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X19": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
+DEFAULT_VERSION = "DUAL"
 
 
 def load_params(version=None):
@@ -270,6 +275,9 @@ class Bot:
         random.seed(hello.get("seed", 0))
         self.geo = Geo(hello["map"]["dir"])
         mf.log(f"geo ready in {time.time() - t0:.2f}s")
+        self.mu2 = None; self.dual_ffa = False; self.dual_why = ""; self.dual_deaths = []; self.dual_ev = []
+        self.dual_hp = {}; self.dual_kills = 0
+        self.dual_hello = hello
         self.wcfg = self.cfg["weapons"]
         self.mech = self.cfg["mech"]
         self.vis = self.cfg["vision"]
@@ -312,6 +320,13 @@ class Bot:
         # B2/B3: is this a free-for-all? Practice house bots never kill each other, so any death we didn't cause
         # (zone deaths aside) means other mechs are fighting each other.
         self.base_flags = set(self.flags)
+        if "dual" in self.flags:
+            import mu2bot
+            t1 = time.time()
+            rs = random.getstate()   # MU2 reseeds the shared random module; keep AC4's sequence unchanged
+            self.mu2 = mu2bot.Bot(self.dual_hello)   # hello allows 20 s; both brains are ready before the first tick
+            random.setstate(rs)
+            mf.log(f"dual: mu2 brain ready in {time.time() - t1:.2f}s")
         self.my_kills = 0
         self.other_deaths = []   # times at which mechs died by other hands (for the timing-aware rule)
         self.ffa = False
@@ -457,6 +472,64 @@ class Bot:
 
     # ------------------------------------------------------------------ main
     def act(self, obs):
+        if "dual" not in self.flags:
+            return self.act_core(obs)
+        if self.dual_ffa:
+            return self.mu2.act(obs)
+        a = self.act_core(obs)
+        self.dual_detect(obs)
+        if self.dual_ffa:
+            self.mu2.attackers.update(self.attackers)
+            self.mu2.blacklist.update(self.blacklist)
+            mf.log(f"dual: free-for-all at t={obs['t']:.1f} ({self.dual_why})")
+        return a
+
+    def dual_detect(self, obs):
+        t = obs["t"]
+        me = obs["self"]
+        hit_by_us = set()
+        for e in obs.get("events", []):
+            if e["type"] == "kill":
+                self.dual_kills += 1
+            elif e["type"] == "hit":
+                hit_by_us.add(e.get("target"))
+        total = self.cfg.get("match", {}).get("mechs", 16)
+        others = (total - obs.get("alive", total)) - self.dual_kills
+        while len(self.dual_deaths) < others:
+            self.dual_deaths.append(t)
+        n = len(self.dual_deaths)
+        if n and ((n >= 2 and t < 30) or (n >= 3 and t < 60) or n >= 6):
+            self.dual_ffa = True; self.dual_why = f"{n} deaths we did not cause"
+            return
+        if t > 45:
+            return   # fights between visible mechs only count early: later, zone and drone damage look the same
+        mechs = [m for m in obs.get("mechs", []) if m.get("kind", "mech") == "mech"]
+        mx, my = me["pos"][0], me["pos"][1]
+        hp_now = {m["id"]: m["hp"] for m in mechs if m.get("hp") is not None}
+        for a in mechs:
+            if not a.get("aim"):
+                continue
+            ax, ay = a["pos"][0], a["pos"][1]
+            if abs(wrap(a["aim"][0] - math.atan2(my - ay, mx - ax))) < 0.6:
+                continue   # it may be aiming at us
+            for b in mechs:
+                if b is a:
+                    continue
+                dx, dy = b["pos"][0] - ax, b["pos"][1] - ay
+                if dx * dx + dy * dy > 140 * 140 or abs(wrap(a["aim"][0] - math.atan2(dy, dx))) > 0.35:
+                    continue
+                if not b.get("aim") or abs(wrap(b["aim"][0] - math.atan2(-dy, -dx))) > 0.35:
+                    continue   # house bots never aim at each other; a real fight is mutual
+                lost = b["id"] in self.dual_hp and b["id"] in hp_now and hp_now[b["id"]] < self.dual_hp[b["id"]] - 1 \
+                    and b["id"] not in hit_by_us
+                if lost:
+                    self.dual_ev.append(t)
+        self.dual_hp = hp_now
+        self.dual_ev = [u for u in self.dual_ev if t - u < 3.0]
+        if len(self.dual_ev) >= 2:
+            self.dual_ffa = True; self.dual_why = "mechs fighting each other"
+
+    def act_core(self, obs):
         t = obs["t"]
         self.t_now = t
         me = obs["self"]
@@ -1270,6 +1343,8 @@ class Bot:
                 continue
             d = d2(c["pos"], (x, y))
             cm = 1.6 if ("endgame" in self.flags and self.stage != "early") else 1.0   # B7: cubes are HP for the end
+            if "cubecap" in self.flags and me.get("cubes", 0) >= 10 and d > 40:
+                continue
             if d < P["loot_c_range"] * lr * cm and inzone(c["pos"]) and reachable(c["pos"]):
                 sc = d - P["loot_c_bonus"]
                 if best is None or sc < best[0]:
@@ -1290,6 +1365,8 @@ class Bot:
                 if self.blacklist.get(mid, 0) > t or not inzone(pos):
                     continue
                 d = d2(pos, (x, y))
+                if kind == "cube" and "cubecap" in self.flags and me.get("cubes", 0) >= 10 and d > 40:
+                    continue
                 if kind == "cube" and d < 150 and reachable(pos):
                     sc = d - 30
                 elif kind in ("laser", "lightning", "mortar") and kind not in have and d < 160 and reachable(pos) \
@@ -1469,6 +1546,12 @@ class Bot:
                 aim = [sol[0], sol[1]]
             primary = i
             break
+        if "gunlaser" in self.flags and primary is not None and weapons[primary]["kind"] == "laser":
+            lw = weapons[primary]
+            if lw.get("charge", 0) < lw["stats"].get("charge", 0.75) - 0.18:
+                for g in weapons:
+                    if g and g["kind"] == "gun" and los and dist < g["stats"]["range"] * 0.95 and g["ammo"] > 0 and g["reload"] == 0:
+                        aim = self.aim_at(mz, self.lead(mz, tp, vel, g["stats"]["speed"]))
         if aim is None:
             # no shot: face the target anyway (front armor, vision)
             aim = self.aim_at(mz, tp)
