@@ -92,6 +92,9 @@ VERSIONS = {
     "G1": "gunwise,dodge,laserfirst",             # C8 + laser first
     "G2": "gunwise,dodge,fightcover",             # C8 + fight from a covered firing spot + head early for the next circle
     "G3": "gunwise,dodge,fightcover,laserfirst",  # G2 + laser first
+    "G4": "gunwise,dodge,holdspot",           # C8 + fight from the pre-chosen covered spot when the target is in range
+    "G5": "gunwise,dodge,adapt",              # C8 + learn press vs space during the match (damage out - in)
+    "G6": "gunwise,dodge,holdspot,adapt",     # G4 + G5
     "F3": "gunwise,dodge,berserk,laserfirst",  # F1 + grab a laser/lightning in sight before chasing mechs not shooting us
     "D1": "gunwise",            # A9, fight harder: retreat only when nearly dead or swarmed
     "D2": "gunwise,econ",       # A9 + economy loop: farm wider, opportunistic shots at crates and drones
@@ -130,7 +133,7 @@ VERSION_PARAMS = {
 }
 VERSION_PARAMS.update({"C1": VERSION_PARAMS["B4"], "C2": VERSION_PARAMS["B5"], "C3": VERSION_PARAMS["B6"], "C4": VERSION_PARAMS["B7"],
                        "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "D1": {"flee_hp1": 0.2, "flee_hp2": 0.3, "flee_natt": 3, "flee_nlos": 4}, "D2": {"crate_range": 150, "loot_c_range": 110}, "E2": VERSION_PARAMS["B6"], "G2": {"zone_lead": 60}, "G3": {"zone_lead": 60}, "F1": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "F2": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.35, "bz_back": 0.6}, "F3": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "X20": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X21": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X22": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X23": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.3, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X24": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.4}, "X25": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.75, "heal_lo_late": 0.65}, "X26": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X27": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X10": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X11": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X12": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X13": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X14": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X15": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X16": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X17": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X18": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X19": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
-DEFAULT_VERSION = "G3"
+DEFAULT_VERSION = "G4"
 
 
 def load_params(version=None):
@@ -203,6 +206,9 @@ class Bot:
         self.stage = "early"
         self.healing = False
         self.bz_retreat = False
+        self.dmg_out = 0.0; self.dmg_in = 0.0          # G5: running damage totals vs mechs
+        self.arm_stats = {"press": [1.0, 0.3], "space": [1.0, 0.0]}   # [pseudo-count, reward sum]: lean to press
+        self.eng = None
         # B2/B3: is this a free-for-all? Practice house bots never kill each other, so any death we didn't cause
         # (zone deaths aside) means other mechs are fighting each other.
         self.base_flags = set(self.flags)
@@ -381,6 +387,12 @@ class Bot:
                     self.sound_bearing = s["bearing"]
                     self.sound_until = t + 1.5
 
+        for e in obs.get("events", []):
+            if e["type"] == "hit" and isinstance(e.get("target"), int) and e["target"] < 100:
+                self.dmg_out += e.get("amount", 0)
+            elif e["type"] == "damaged" and e.get("weapon") != "zone":
+                self.dmg_in += e.get("amount", 0)
+
         # ---- stuck detection
         speed = math.hypot(me["vel"][0], me["vel"][1])
         if self.last_pos is not None and getattr(self, "last_move_mag", 0) > 0.5 and me["grounded"] and speed < 1.5:
@@ -520,6 +532,20 @@ class Bot:
             watch = min(vis, key=lambda m: m["d"]) if vis else None
         if target is not None:
             self.cur_target = target["id"]; self.cur_target_t = t
+        if "adapt" in self.flags:
+            if target is not None:
+                if self.eng is None:
+                    tot = sum(v[0] for v in self.arm_stats.values())
+                    def ucb(a):
+                        n, sm = self.arm_stats[a]
+                        return sm / n + 0.6 * math.sqrt(math.log(tot + 1) / n)
+                    self.eng = {"arm": max(self.arm_stats, key=ucb), "o0": self.dmg_out, "i0": self.dmg_in, "last": t}
+                else:
+                    self.eng["last"] = t
+            elif self.eng is not None and t - self.eng["last"] > 3:
+                r = ((self.dmg_out - self.eng["o0"]) - (self.dmg_in - self.eng["i0"])) / 300.0
+                a = self.arm_stats[self.eng["arm"]]; a[0] += 1; a[1] += max(-3.0, min(3.0, r))
+                self.eng = None
         recent_att = [k for k, tt in self.attackers.items() if t - tt < 3]
         close_enemies = [m for m in mechs if m["d"] < 120]
 
@@ -622,6 +648,14 @@ class Bot:
                     radial = 0.0 if (("endgame" in self.flags or "calmlate" in self.flags) and self.stage == "late") else P["radial"]   # don't chase late
                 elif target["d"] < want_lo:
                     radial = -P["radial"]
+                if "adapt" in self.flags and self.eng is not None and self.eng["arm"] == "space":
+                    # space: never chase; back off to the far end of our range
+                    radial = -P["radial"] if target["d"] < 0.8 * want_hi else 0.0
+                    tag += "s"
+                if "holdspot" in self.flags and self.hide and d2((x, y), self.hide) < 8 and target["los"] \
+                        and target["d"] <= want_hi * 1.1:
+                    radial = 0.0; px, py = px * 0.4, py * 0.4   # at our covered spot with a shot: stay and fight from here
+                    tag += "h"
                 move = (px + bx * radial, py + by * radial)
                 if "fightcover" in self.flags and target["d"] > 40:
                     spot = self.firing_spot(me, target, mechs, want_lo, want_hi, t)
