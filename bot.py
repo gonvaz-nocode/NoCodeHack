@@ -44,6 +44,8 @@ PARAMS = {
     "ph_prac_t": 45.0, "ph_prac_cubes": 2.0, "ph_ffa_alive": 6.0, "ph_loot_w": 1.3,
     # C5 "heal": start healing under heal_lo, stop at heal_hi; don't start fights under heal_start
     "heal_lo": 0.5, "heal_hi": 0.9, "heal_start": 0.7,
+    # F1 "berserk": retreat (out of sight, behind cover) only under bz_flee HP; go back in at bz_back
+    "bz_flee": 0.25, "bz_back": 0.5,
     # X10 profile: easy kills (hp under easy_hp, within easy_d, back turned, or shooting us); harvest until a second
     # weapon and harvest_cubes cubes; heal threshold rises to heal_lo_late once the zone is small
     "easy_hp": 0.4, "easy_d": 45.0, "harvest_cubes": 2.0, "heal_lo_late": 0.5,
@@ -85,6 +87,9 @@ VERSIONS = {
     "E1": "gunwise,dodge,heal",          # C8 (best real 3.88) + heal between fights
     "E2": "gunwise,dodge",               # C8 + Z100 tuner's settings
     "E3": "gunwise,dodge,dodgeb",        # C8 + dodge bullets too
+    "F1": "gunwise,dodge,berserk",       # C8, extremely aggressive: chase hard, retreat only under 25% HP (back at 50%)
+    "F2": "gunwise,dodge,berserk",       # F1, retreat under 35% (back at 60%)
+    "F3": "gunwise,dodge,berserk,laserfirst",  # F1 + grab a laser/lightning in sight before chasing mechs not shooting us
     "D1": "gunwise",            # A9, fight harder: retreat only when nearly dead or swarmed
     "D2": "gunwise,econ",       # A9 + economy loop: farm wider, opportunistic shots at crates and drones
     "X10": "gunwise,econ,harvest,easy,heal,crowd,calmlate",  # profile: loot first, easy kills, heal at 40% (65% late), avoid being focused, calm late game
@@ -121,8 +126,8 @@ VERSION_PARAMS = {
     "B7": {"end_flee_hp1": 0.5, "end_flee_hp2": 0.7},
 }
 VERSION_PARAMS.update({"C1": VERSION_PARAMS["B4"], "C2": VERSION_PARAMS["B5"], "C3": VERSION_PARAMS["B6"], "C4": VERSION_PARAMS["B7"],
-                       "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "D1": {"flee_hp1": 0.2, "flee_hp2": 0.3, "flee_natt": 3, "flee_nlos": 4}, "D2": {"crate_range": 150, "loot_c_range": 110}, "E2": VERSION_PARAMS["B6"], "X20": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X21": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X22": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X23": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.3, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X24": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.4}, "X25": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.75, "heal_lo_late": 0.65}, "X26": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X27": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X10": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X11": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X12": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X13": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X14": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X15": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X16": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X17": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X18": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X19": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
-DEFAULT_VERSION = "E1"
+                       "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "D1": {"flee_hp1": 0.2, "flee_hp2": 0.3, "flee_natt": 3, "flee_nlos": 4}, "D2": {"crate_range": 150, "loot_c_range": 110}, "E2": VERSION_PARAMS["B6"], "F1": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "F2": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.35, "bz_back": 0.6}, "F3": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "X20": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X21": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X22": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X23": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.3, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X24": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.4}, "X25": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.75, "heal_lo_late": 0.65}, "X26": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X27": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X10": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X11": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X12": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X13": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X14": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X15": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X16": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X17": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X18": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X19": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
+DEFAULT_VERSION = "F1"
 
 
 def load_params(version=None):
@@ -194,6 +199,7 @@ class Bot:
         self.center_spot = None
         self.stage = "early"
         self.healing = False
+        self.bz_retreat = False
         # B2/B3: is this a free-for-all? Practice house bots never kill each other, so any death we didn't cause
         # (zone deaths aside) means other mechs are fighting each other.
         self.base_flags = set(self.flags)
@@ -493,6 +499,16 @@ class Bot:
             cands = [m for m in mechs if threatening(m)]
         else:
             cands = mechs
+        if "laserfirst" in self.flags and not any(k in ("laser", "lightning") for k in kinds):
+            spec = [p for p in obs.get("pickups", []) if p["kind"] in ("laser", "lightning")
+                    and d2(p["pos"], (x, y)) < 120 and self.blacklist.get(p["id"], 0) <= t]
+            if spec:
+                cands = [m for m in cands if hit_us(m, 4) or m["d"] < 30]
+                self.want_special = min(spec, key=lambda p: d2(p["pos"], (x, y)))
+            else:
+                self.want_special = None
+        else:
+            self.want_special = None
         target = min(cands, key=threat_score) if cands else None
         # a visible mech we chose not to fight: keep our front armour (and eyes) on it and get out of its sight
         watch = None
@@ -562,6 +578,14 @@ class Bot:
                 # B7: from mid-game, bank HP for the last circles: break off sooner
                 if hp_frac < P["end_flee_hp1"] or (hp_frac < P["end_flee_hp2"] and target["hp"] > me["hp"]):
                     losing = True
+            if "berserk" in self.flags:
+                if hp_frac < P["bz_flee"]:
+                    self.bz_retreat = True
+                elif hp_frac >= P["bz_back"]:
+                    self.bz_retreat = False
+                losing = self.bz_retreat   # numbers or a stronger enemy never make us break off; low HP does
+                if not losing:
+                    self.flee_until = 0.0
             if "crowd" in self.flags and n_los >= 2 and any(t - tt < 3 for tt in self.attackers.values()):
                 losing = True   # X10: 2+ enemies have a line on us and we are the one being shot: get out
             if "heal" in self.flags:
@@ -608,8 +632,10 @@ class Bot:
             goal = None
             if need_zone:
                 goal = self.hide; mode = "zone"
-            elif "heal" in self.flags and self.healing:
+            elif ("heal" in self.flags and self.healing) or ("berserk" in self.flags and self.bz_retreat):
                 goal = self.hide; mode = "heal"
+            elif getattr(self, "want_special", None) is not None:
+                goal = (self.want_special["pos"][0], self.want_special["pos"][1], "weapon"); mode = "weapon"
             else:
                 goal = self.loot_goal(me, obs, npcs, kinds, t, cur_c, cur_r)
                 if goal is None:
