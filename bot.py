@@ -65,6 +65,12 @@ VERSIONS = {
     "B6": "phased,switch,gunwise",           # Z100 tuner's best settings (sim-tuned, 3 generations)
     "B7": "phased,switch,gunwise,endgame",   # end-game survival push: drops, cubes, keep HP for the last circles
     "B8": "phased,switch,gunwise",           # B3 corrected: practice play identical to A9; free-for-all needs 2 deaths
+    "B9": "phased,switch,gunwise,timed",     # B8 with timing-aware detection: 2 deaths by 30 s, 3 by 60 s, or 6 any time
+    # the B4-B7 experiments rebuilt on B9 (B3's detection false-alarmed in practice)
+    "C1": "phased,switch,gunwise,timed",           # B9 + more careful gun (B4's settings)
+    "C2": "phased,switch,gunwise,timed",           # B9 + less careful gun (B5's settings)
+    "C3": "phased,switch,gunwise,timed",           # B9 + Z100 tuner's settings (B6's)
+    "C4": "phased,switch,gunwise,timed,endgame",   # B9 + end-game survival push (B7's)
 }
 # Per-version setting overrides, applied on top of PARAMS (SURVIVOR_PARAMS still overrides both).
 VERSION_PARAMS = {
@@ -80,7 +86,8 @@ VERSION_PARAMS = {
     # B7: from the mid stage on, keep HP: flee earlier, don't chase; supply-drop and cube reach in loot_goal
     "B7": {"end_flee_hp1": 0.5, "end_flee_hp2": 0.7},
 }
-DEFAULT_VERSION = "B8"
+VERSION_PARAMS.update({"C1": VERSION_PARAMS["B4"], "C2": VERSION_PARAMS["B5"], "C3": VERSION_PARAMS["B6"], "C4": VERSION_PARAMS["B7"]})
+DEFAULT_VERSION = "B9"
 
 
 def load_params(version=None):
@@ -155,6 +162,7 @@ class Bot:
         # (zone deaths aside) means other mechs are fighting each other.
         self.base_flags = set(self.flags)
         self.my_kills = 0
+        self.other_deaths = []   # times at which mechs died by other hands (for the timing-aware rule)
         self.ffa = False
         self.plan = "hunt" if "switch" in self.flags else "build"
         self._cover_cache = None
@@ -635,7 +643,15 @@ class Bot:
         # other mechs are fighting each other (free-for-all). Later, require two to allow for zone deaths.
         # Two unexplained deaths, not one: on the real server a house bot can also die to an NPC drone or its own mortar,
         # and kill events in skipped observations are lost. Real free-for-alls lose mechs fast, so two comes quickly.
-        if not self.ffa and others_died >= (2 if t < 200 else 3):
+        while len(self.other_deaths) < others_died:
+            self.other_deaths.append(t)
+        if "timed" in self.base_flags:
+            # B9: practice deaths by drones or the zone come slowly; a free-for-all loses mechs fast (sim2 logs: this
+            # rule false-alarms in 2% of practice matches and catches 80% of free-for-alls, median 19 s in)
+            n = len(self.other_deaths)
+            if not self.ffa and n and ((n >= 2 and t < 30) or (n >= 3 and t < 60) or n >= 6):
+                self.ffa = True
+        elif not self.ffa and others_died >= (2 if t < 200 else 3):
             self.ffa = True
         if "switch" in self.base_flags:
             self.plan = "build" if self.ffa else "hunt"          # B3: A8-style hiding for the rest of a free-for-all
