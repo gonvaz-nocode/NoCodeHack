@@ -48,6 +48,8 @@ PARAMS = {
     "bz_flee": 0.25, "bz_back": 0.5,
     # G4 hold-spot range factor (hold for targets within want_hi * hold_range); H1 roof escape threshold
     "hold_range": 1.1, "roofesc_hp": 0.35,
+    # I-series repair: heal when under rep_lo, or under rep_hi inside the quiet window after a kill (rep_kill s)
+    "rep_lo": 0.55, "rep_hi": 0.9, "rep_kill": 8.0,
     # X10 profile: easy kills (hp under easy_hp, within easy_d, back turned, or shooting us); harvest until a second
     # weapon and harvest_cubes cubes; heal threshold rises to heal_lo_late once the zone is small
     "easy_hp": 0.4, "easy_d": 45.0, "harvest_cubes": 2.0, "heal_lo_late": 0.5,
@@ -97,6 +99,10 @@ VERSIONS = {
     "G4": "gunwise,dodge,holdspot",           # C8 + fight from the pre-chosen covered spot when the target is in range
     "G5": "gunwise,dodge,adapt",              # C8 + learn press vs space during the match (damage out - in)
     "G6": "gunwise,dodge,holdspot,adapt",     # G4 + G5
+    "L1": "gunwise,dodge,holdspot,repair,memory,midcube",     # I3 + mid-fight grabs
+    "L2": "gunwise,dodge,holdspot,repair,memory,reloadwait",  # I3 + don't push while reloading
+    "L3": "gunwise,dodge,holdspot,repair,memory,sprint",      # I3 + fast opening sweep
+    "L4": "gunwise,dodge,holdspot,repair,memory",             # I3 with stronger repair (60% / 95% / 10 s)
     "K1": "gunwise,dodge,holdspot,midcube",                          # G4 + grab cubes / a special mid-fight
     "K2": "gunwise,dodge,holdspot,precharge",                        # G4 + laser pre-charge on tracked targets
     "K3": "gunwise,dodge,holdspot,midcube,precharge",                # K1 + K2
@@ -151,8 +157,8 @@ VERSION_PARAMS = {
     "B7": {"end_flee_hp1": 0.5, "end_flee_hp2": 0.7},
 }
 VERSION_PARAMS.update({"C1": VERSION_PARAMS["B4"], "C2": VERSION_PARAMS["B5"], "C3": VERSION_PARAMS["B6"], "C4": VERSION_PARAMS["B7"],
-                       "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "D1": {"flee_hp1": 0.2, "flee_hp2": 0.3, "flee_natt": 3, "flee_nlos": 4}, "D2": {"crate_range": 150, "loot_c_range": 110}, "E2": VERSION_PARAMS["B6"], "G2": {"zone_lead": 60}, "H2": {"zone_lead": 60}, "J2": {"rng_gun_lo": 20, "rng_gun_hi": 40, "flee_hp1": 0.15, "flee_hp2": 0.2, "ts_nolos": 20}, "H4": {"hold_range": 1.4}, "G3": {"zone_lead": 60}, "F1": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "F2": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.35, "bz_back": 0.6}, "F3": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "X20": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X21": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X22": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X23": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.3, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X24": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.4}, "X25": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.75, "heal_lo_late": 0.65}, "X26": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X27": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X10": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X11": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X12": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X13": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X14": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X15": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X16": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X17": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X18": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X19": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
-DEFAULT_VERSION = "K4"
+                       "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "D1": {"flee_hp1": 0.2, "flee_hp2": 0.3, "flee_natt": 3, "flee_nlos": 4}, "D2": {"crate_range": 150, "loot_c_range": 110}, "E2": VERSION_PARAMS["B6"], "G2": {"zone_lead": 60}, "H2": {"zone_lead": 60}, "L4": {"rep_lo": 0.6, "rep_hi": 0.95, "rep_kill": 10}, "J2": {"rng_gun_lo": 20, "rng_gun_hi": 40, "flee_hp1": 0.15, "flee_hp2": 0.2, "ts_nolos": 20}, "H4": {"hold_range": 1.4}, "G3": {"zone_lead": 60}, "F1": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "F2": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.35, "bz_back": 0.6}, "F3": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "X20": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X21": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X22": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X23": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.3, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X24": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.4}, "X25": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.75, "heal_lo_late": 0.65}, "X26": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X27": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X10": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X11": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X12": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X13": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X14": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X15": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X16": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X17": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X18": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X19": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
+DEFAULT_VERSION = "L1"
 
 
 def load_params(version=None):
@@ -402,7 +408,7 @@ class Bot:
                     self.attackers[e["by"]] = t
             elif e["type"] == "kill":
                 self.my_kills += 1
-                self.repair_until = max(self.repair_until, t + 8)
+                self.repair_until = max(self.repair_until, t + self.P["rep_kill"])
             elif e["type"] == "take_failed":
                 self.blacklist[e["id"]] = t + 20
         for s in obs.get("sounds", []):
@@ -686,6 +692,11 @@ class Bot:
                     radial = 0.0 if (("endgame" in self.flags or "calmlate" in self.flags) and self.stage == "late") else P["radial"]   # don't chase late
                 elif target["d"] < want_lo:
                     radial = -P["radial"]
+                if "reloadwait" in self.flags and radial > 0:
+                    gw = next((w for w in weapons if w and w["kind"] == "gun"), None)
+                    other_ready = any(w and w["kind"] != "gun" and w["cooldown"] <= 0.2 for w in weapons)
+                    if gw and gw["reload"] > 0 and not other_ready:
+                        radial = 0.0; tag += "r"
                 if "adapt" in self.flags and self.eng is not None and self.eng["arm"] == "space":
                     # space: never chase; back off to the far end of our range
                     radial = -P["radial"] if target["d"] < 0.8 * want_hi else 0.0
@@ -725,7 +736,7 @@ class Bot:
             goal = None
             if need_zone:
                 goal = self.hide; mode = "zone"
-            elif "repair" in self.flags and (hp_frac < 0.55 or (t < self.repair_until and hp_frac < 0.9)):
+            elif "repair" in self.flags and (hp_frac < P["rep_lo"] or (t < self.repair_until and hp_frac < P["rep_hi"])):
                 goal = (x, y); mode = "repair"
                 lt = self.last_threat
                 if lt and t - lt[3] < 20 and self.geo.los((lt[0], lt[1], lt[2] + 8), (x, y, z + 6)):
