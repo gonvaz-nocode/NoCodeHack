@@ -60,7 +60,7 @@ VERSIONS = {
                                   # on whether this is practice or a free-for-all, detected from who is killing whom)
     "B3": "phased,switch,gunwise",  # A9 guns; aggressive in practice, A8-style hiding for the rest of a free-for-all
 }
-DEFAULT_VERSION = "B2"
+DEFAULT_VERSION = "B3"
 
 
 def load_params():
