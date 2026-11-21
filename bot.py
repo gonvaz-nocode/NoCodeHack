@@ -3,7 +3,7 @@
 Priorities: stay inside the zone, stay near cover, loot early, fight facing the enemy while strafing,
 break line of sight when losing, and bank HP (cubes, plating) for the end-game zone.
 """
-import math, random, sys, time
+import math, os, random, sys, time
 import mechfight as mf
 from geo import Geo
 
@@ -42,6 +42,17 @@ class Bot:
         self.stuck_ticks = 0
         self.unstick_until = 0.0
         self.unstick_dir = None
+        self.last_mode = "idle"
+        self.prog = []           # (t, x, y) while travelling outside combat, to catch back-and-forth loops
+        # behaviour switches, all OFF by default (set SURVIVOR_FLAGS, e.g. "cover,creep", to try them in tools/sim.py):
+        #   pick  = fight only mechs that threaten us; otherwise face them and slip into cover
+        #   cover = route cover-to-cover (open ground costs more) when the zone isn't pressing
+        #   creep = walk below the footstep threshold when an enemy was near recently and the zone allows it
+        # Sim A/B (120 practice + 15 ffa seeds): pick -0.9 pts/match (significant), cover and creep -0.2..-0.3 (noise;
+        # the sim has no canopy or sound, so it can only show their costs). See the review notes before turning any on.
+        fl = os.environ.get("SURVIVOR_FLAGS", "")
+        self.flags = set(f.strip() for f in fl.split(",") if f.strip())
+        self.contact_t = -99.0   # last time an enemy was seen within 70 m or heard near
         self.threat_bearing = None
         self.threat_until = 0.0
         self.attackers = {}      # id -> last time they damaged us
@@ -126,14 +137,14 @@ class Bot:
                 return math.cos(a), math.sin(a)
         return dx, dy
 
-    def nav_to(self, me, gx, gy):
+    def nav_to(self, me, gx, gy, weighted=False):
         x, y = me["pos"][0], me["pos"][1]
         if d2((x, y), (gx, gy)) < 3:
             return (0.0, 0.0), 0.0
-        if self.geo.walk_line(x, y, gx, gy):
+        if self.geo.walk_line(x, y, gx, gy) and (not weighted or d2((x, y), (gx, gy)) < 40):
             d = d2((x, y), (gx, gy))
             return ((gx - x) / d, (gy - y) / d), d
-        f = self.geo.field(gx, gy, x, y)
+        f = self.geo.field(gx, gy, x, y, weighted=weighted)
         if f is None:
             d = d2((x, y), (gx, gy))
             ux, uy = self.safe_dir(x, y, (gx - x) / d, (gy - y) / d)
@@ -214,7 +225,18 @@ class Bot:
         else:
             self.stuck_ticks = max(0, self.stuck_ticks - 1)
         self.last_pos = (x, y)
-        if self.stuck_ticks > 8 and t > self.unstick_until:
+        # no net progress: moving at speed but shuttling back and forth (speed alone never shows that)
+        looping = False
+        if getattr(self, "last_move_mag", 0) > 0.5 and self.last_mode not in ("fight", "flee", "idle", "hide") and t > self.unstick_until:
+            self.prog.append((t, x, y))
+            while self.prog and t - self.prog[0][0] > 4.0:
+                self.prog.pop(0)
+            if t - self.prog[0][0] >= 3.9 and d2((x, y), self.prog[0][1:]) < 4.0:
+                looping = True
+        else:
+            self.prog = []
+        if looping or (self.stuck_ticks > 8 and t > self.unstick_until):
+            self.prog = []
             self.unstick_until = t + 1.2
             a = random.random() * TAU
             self.unstick_dir = (math.cos(a), math.sin(a))
@@ -256,13 +278,39 @@ class Bot:
                 s -= 45
             return s
 
-        target = min(mechs, key=threat_score) if mechs else None
+        if any(m["d"] < 70 for m in mechs) or any(s["dist"] == "near" and s["kind"] != "death" for s in obs.get("sounds", [])):
+            self.contact_t = t
+
+        def threatening(m):
+            """Worth fighting: it hit us lately, it's on top of us, it's aiming at us, or it's a cheap kill."""
+            if m["id"] in self.attackers and t - self.attackers[m["id"]] < 5:
+                return True
+            if not m["los"]:
+                return False
+            if m["d"] < 40:  # inside its all-round proximity sensors: it sees us anyway
+                return True
+            to_us = math.atan2(y - m["pos"][1], x - m["pos"][0])
+            facing = abs(wrap(m.get("aim", [99])[0] - to_us)) < 0.35
+            if facing and (m.get("charging") or m["d"] < 130):
+                return True
+            if m["hp"] < 0.3 * m.get("max_hp", 1400) and m["d"] < 90 and hp_frac > 0.6:
+                return True
+            return False
+
+        cands = [m for m in mechs if threatening(m)] if "pick" in self.flags else mechs
+        target = min(cands, key=threat_score) if cands else None
+        # a visible mech we chose not to fight: keep our front armour (and eyes) on it and get out of its sight
+        watch = None
+        if target is None and "pick" in self.flags:
+            vis = [m for m in mechs if m["los"] and m["d"] < 180]
+            watch = min(vis, key=lambda m: m["d"]) if vis else None
         if target is not None:
             self.cur_target = target["id"]; self.cur_target_t = t
         recent_att = [k for k, tt in self.attackers.items() if t - tt < 3]
         close_enemies = [m for m in mechs if m["d"] < 120]
 
         # ---- choose movement
+        crept = False
         move = (0.0, 0.0)
         boost = False
         mode = "idle"
@@ -336,9 +384,17 @@ class Bot:
                     goal = self.hide; mode = "hide"
                 else:
                     mode = goal[2]
+            zone_calm = in_zone and dcur < cur_r - 30 and not need_zone
+            if watch is not None and mode != "zone" and watch["d"] < 140:
+                spot = self.cover_from(me, [watch])
+                if spot:
+                    goal = (spot[0], spot[1], "avoid"); mode = "avoid"
             if goal is not None:
-                mv, rem = self.nav_to(me, goal[0], goal[1])
+                weighted = "cover" in self.flags and mode not in ("zone", "avoid") and zone_calm
+                mv, rem = self.nav_to(me, goal[0], goal[1], weighted=weighted)
                 move = mv
+                if mode == "avoid" and rem < 2:
+                    move = (0.0, 0.0)
                 if mode == "hide" and rem < 4:
                     move = (0.0, 0.0)
                 if mode == "zone" and not in_zone:
@@ -347,6 +403,14 @@ class Bot:
                 if mode in ("hide",) and rem < 60 and in_zone:
                     k = 4.6 / max(me["stats"].get("walk_speed", 11.7), 1)
                     move = (move[0] * k, move[1] * k)
+                # creep: footsteps start at sound.step_speed and carry sound.range.step (40 m); only worth the lost
+                # speed when someone was close lately and the zone leaves time for it
+                elif "creep" in self.flags and mode not in ("zone",) and zone_calm and t - self.contact_t < 6:
+                    lim = 0.92 * self.cfg.get("sound", {}).get("step_speed", 5.0)
+                    k = min(1.0, lim / max(me["stats"].get("walk_speed", 11.7), 1))
+                    move = (move[0] * k, move[1] * k)
+                    boost = False
+                    crept = True
             if mode in ("npc", "crate") and self.loot_target is not None:
                 shoot_target = self.loot_target
 
@@ -372,6 +436,8 @@ class Bot:
         fire = [False, False]
         if shoot_target is not None:
             aim, fire = self.combat(me, obs, shoot_target, kinds, mechs, npcs)
+        if aim is None and watch is not None:
+            aim = self.aim_at(eye, (watch["pos"][0], watch["pos"][1], watch["pos"][2] + 4.5))
         if aim is None:
             aim = self.scan_aim(me, obs, move, t)
         act["aim"] = [round(aim[0], 4), round(aim[1], 4)]
@@ -383,7 +449,8 @@ class Bot:
         g = weapons[0] if kinds[0] == "gun" else (weapons[1] if kinds[1] == "gun" else None)
         if g and g["reload"] == 0 and g["ammo"] < g["stats"]["mag"] * 0.5 and not any(fire) and mode not in ("fight", "flee"):
             act["reload"] = True
-        mf.draw.label(f"{mode} hp{me['hp']:.0f} e{me['energy']:.0f}")
+        self.last_mode = mode
+        mf.draw.label(f"{mode}{'~' if crept else ''} hp{me['hp']:.0f} e{me['energy']:.0f}")
         return act
 
     # ------------------------------------------------------------------ sub-behaviours
