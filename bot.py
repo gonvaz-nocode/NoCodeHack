@@ -9,6 +9,66 @@ from geo import Geo
 
 TAU = 2 * math.pi
 WEAPON_RANK = {"laser": 3, "lightning": 2, "mortar": 1, "gun": 0}
+
+# Tunable numbers (tools/tune.py searches these in the sim). Defaults are the hand-picked v1 values; a JSON object in
+# SURVIVOR_PARAMS overrides any of them (only the tuner sets it; the match server does not).
+PARAMS = {
+    # preferred fighting range by best weapon held
+    "rng_laser_lo": 60.0, "rng_laser_hi": 160.0, "rng_light_lo": 12.0, "rng_light_hi": 32.0,
+    "rng_mortar_lo": 50.0, "rng_mortar_hi": 130.0, "rng_gun_lo": 25.0, "rng_gun_hi": 70.0,
+    "radial": 0.8,                                   # how hard to close / open the range
+    # when to flee
+    "flee_hp1": 0.35, "flee_ratio1": 1.1, "flee_hp2": 0.5, "flee_ratio2": 1.3,
+    "flee_natt": 2.0, "flee_nlos": 3.0, "flee_hold": 2.0, "flee_boost_e": 15.0,
+    # fight movement
+    "strafe_min": 0.3, "strafe_max": 0.9, "fight_boost_e": 45.0, "fight_boost_d": 150.0,
+    # target choice: score = d + hp*ts_hp - attacker*ts_att + no_los*ts_nolos - sticky*ts_sticky (lowest wins)
+    "ts_hp": 0.04, "ts_att": 60.0, "ts_nolos": 80.0, "ts_sticky": 45.0,
+    # zone
+    "zone_lead": 25.0, "zone_edge": 8.0, "zone_margin": 30.0, "zone_margin_frac": 0.35,
+    "hide_cover": 60.0, "hide_dist": 0.08, "hide_center": 12.0,
+    # loot
+    "loot_w_range": 90.0, "loot_w_rank": 15.0, "loot_c_range": 70.0, "loot_c_bonus": 10.0,
+    "crate_hp": 0.6, "crate_range": 70.0,
+    "rank_laser": 3.0, "rank_light": 2.0, "rank_mortar": 1.0,
+    # gun trigger tolerance multiplier
+    "gun_tol": 1.6,
+    # A9 "gunwise": gun policy by game stage (stage = early while the zone is wider than stage_mid_r, late below
+    # stage_late_r): longest range we open fire at unattacked, the least hit chance worth a shot, reload threshold
+    "stage_mid_r": 300.0, "stage_late_r": 100.0,
+    "gun_maxd_early": 110.0, "gun_maxd_mid": 170.0, "gun_maxd_late": 230.0,
+    "gun_phit_early": 0.45, "gun_phit_mid": 0.30, "gun_phit_late": 0.15,
+    "gun_reload_early": 0.75, "gun_reload_mid": 0.5, "gun_reload_late": 0.34,
+}
+
+# Named versions -> behaviour switches. A1 is the original v1 (git commit f2c923f), not reproducible by switches.
+# DEFAULT_VERSION is what plays in a match; SURVIVOR_VERSION (or a raw SURVIVOR_FLAGS list) overrides it for testing.
+VERSIONS = {
+    "A2": "",                     # A1 + zone-trap fix (commit cbc06b1)
+    "A3": "pick",                 # fight only mechs that threaten us
+    "A4": "cover",                # cover-to-cover routing
+    "A5": "creep",                # walk silently near enemies
+    "A6": "pick,cover,creep",
+    "A7": "flank",                # hit backs hard, shy when faced
+    "A8": "ambush,creep",         # hide more; attack only lone mechs facing away
+    "A9": "gunwise",              # stage-aware gun use
+    "B1": "center",               # walk to a half-sheltered spot near the map centre, then to the zone through cover
+}
+DEFAULT_VERSION = "A7"
+
+
+def load_params():
+    p = dict(PARAMS)
+    raw = os.environ.get("SURVIVOR_PARAMS")
+    if raw:
+        try:
+            import json
+            for k, v in json.loads(raw).items():
+                if k in p:
+                    p[k] = float(v)
+        except Exception as e:
+            print(f"bad SURVIVOR_PARAMS ignored: {e}", file=sys.stderr)
+    return p
 UPGRADE_PREF = ["plating", "armor", "nanites", "laser_damage", "laser_charge", "gun_damage", "gun_rate",
                 "lightning_efficiency", "servos", "gun_mag", "lightning_range", "capacitor", "gun_velocity",
                 "reactor", "jets", "gyros", "sensors", "mortar_reload", "mortar_splash", "mortar_velocity",
@@ -50,8 +110,18 @@ class Bot:
         #   creep = walk below the footstep threshold when an enemy was near recently and the zone allows it
         # Sim A/B (120 practice + 15 ffa seeds): pick -0.9 pts/match (significant), cover and creep -0.2..-0.3 (noise;
         # the sim has no canopy or sound, so it can only show their costs). See the review notes before turning any on.
-        fl = os.environ.get("SURVIVOR_FLAGS", "")
+        self.P = load_params()
+        self.rank = {"laser": self.P["rank_laser"], "lightning": self.P["rank_light"], "mortar": self.P["rank_mortar"], "gun": 0.0}
+        fl = os.environ.get("SURVIVOR_FLAGS")
+        if fl is None:
+            self.version = os.environ.get("SURVIVOR_VERSION", DEFAULT_VERSION)
+            fl = VERSIONS.get(self.version, "")
+        else:
+            self.version = "custom"
         self.flags = set(f.strip() for f in fl.split(",") if f.strip())
+        self.phase = "center" if "center" in self.flags else "normal"   # B1 opening: center -> transit -> normal
+        self.center_spot = None
+        self.stage = "early"
         self.contact_t = -99.0   # last time an enemy was seen within 70 m or heard near
         self.threat_bearing = None
         self.threat_until = 0.0
@@ -96,7 +166,8 @@ class Bot:
         import numpy as np
         g = self.geo
         x, y = me["pos"][0], me["pos"][1]
-        margin = min(30.0, nr * 0.35) + 4
+        P = self.P
+        margin = min(P["zone_margin"], nr * P["zone_margin_frac"]) + 4
         rr = max(nr - margin, 3.0)
         if nr < 40:
             j, i = g.nearest_free(nc[0], nc[1], 40)
@@ -121,7 +192,7 @@ class Bot:
             j, i = g.nearest_free(nc[0], nc[1], 40)
             return g.cell_xy(j, i)
         dc = np.sqrt(dx * dx + dy * dy) / max(rr, 1)
-        score = g.cover * 60.0 - np.where(np.isfinite(df), df, 1e6) * 0.08 - dc * 12.0
+        score = g.cover * P["hide_cover"] * (2.0 if "ambush" in self.flags else 1.0) - np.where(np.isfinite(df), df, 1e6) * P["hide_dist"] - dc * P["hide_center"]
         score = np.where(ok, score, -1e9)
         k = int(np.argmax(score))
         j, i = divmod(k, W)
@@ -189,6 +260,7 @@ class Bot:
     # ------------------------------------------------------------------ main
     def act(self, obs):
         t = obs["t"]
+        self.t_now = t
         me = obs["self"]
         x, y, z = me["pos"]
         act = {"tick": obs["tick"]}
@@ -247,8 +319,9 @@ class Bot:
         dcur = d2((x, y), cur_c)
         in_zone = me["in_zone"]
         dnext = d2((x, y), nc)
-        margin = min(30.0, nr * 0.35)
-        need_zone = (not in_zone) or (dnext > nr - margin * 0.3 and (t > ss - 25 or dnext > nr + 60)) or (dcur > cur_r - 8)
+        P = self.P
+        margin = min(P["zone_margin"], nr * P["zone_margin_frac"])
+        need_zone = (not in_zone) or (dnext > nr - margin * 0.3 and (t > ss - P["zone_lead"] or dnext > nr + 60)) or (dcur > cur_r - P["zone_edge"])
 
         hide_key = (round(nc[0]), round(nc[1]), round(nr))
         if self.hide is None or self.hide_key != hide_key or t - self.hide_time > 40:
@@ -267,15 +340,29 @@ class Bot:
         for n in npcs:
             n["d"] = math.dist(n["pos"], me["pos"])
             n["los"] = self.geo.los(mz, (n["pos"][0], n["pos"][1], n["pos"][2] + 1.7))
+        # which way each mech faces relative to us: off = angle between its torso aim and the line from it to us.
+        # off < ~60 deg: we're in its view wedge; off > 90 deg: we're behind its front arc (our hits do rear damage)
+        arc = math.radians(self.mech.get("front_arc_deg", 180)) / 2
+        for m in mechs:
+            to_us = math.atan2(y - m["pos"][1], x - m["pos"][0])
+            m["off"] = abs(wrap(m["aim"][0] - to_us)) if m.get("aim") else math.pi / 2
+            m["back"] = m["off"] > arc + 0.15
+            m["faces"] = m["off"] < math.radians(self.vis.get("fov_deg", 120)) / 2
+        self.stage = "early" if cur_r > P["stage_mid_r"] else ("late" if cur_r < P["stage_late_r"] else "mid")
 
         def threat_score(m):
-            s = m["d"] + m["hp"] * 0.04
+            s = m["d"] + m["hp"] * P["ts_hp"]
             if m["id"] in self.attackers and t - self.attackers[m["id"]] < 4:
-                s -= 60
+                s -= P["ts_att"]
             if not m["los"]:
-                s += 80
+                s += P["ts_nolos"]
             if m["id"] == self.cur_target and t - self.cur_target_t < 3:
-                s -= 45
+                s -= P["ts_sticky"]
+            if "flank" in self.flags or "ambush" in self.flags:
+                if m["back"]:
+                    s -= 70   # prefer backs
+                elif m["faces"] and m["los"]:
+                    s += 50
             return s
 
         if any(m["d"] < 70 for m in mechs) or any(s["dist"] == "near" and s["kind"] != "death" for s in obs.get("sounds", [])):
@@ -297,11 +384,28 @@ class Bot:
                 return True
             return False
 
-        cands = [m for m in mechs if threatening(m)] if "pick" in self.flags else mechs
+        def hit_us(m, within):
+            return m["id"] in self.attackers and t - self.attackers[m["id"]] < within
+
+        selective = bool(self.flags & {"pick", "flank", "ambush"})
+        if "flank" in self.flags:
+            # A7: go for any back we can shoot; anyone else only if it is already shooting us or is point blank
+            cands = [m for m in mechs if hit_us(m, 4) or (m["los"] and (m["back"] or m["d"] < 35))]
+        elif "ambush" in self.flags:
+            # A8: only a lone mech with its back to us, and only while nobody else has a line on us; defend if hit
+            seen_us = [m for m in mechs if m["los"]]
+
+            def alone(m):
+                return all(math.dist(o["pos"][:2], m["pos"][:2]) > 70 for o in mechs if o is not m)
+            cands = [m for m in mechs if len(seen_us) <= 1 and ((m["los"] and m["back"] and alone(m)) or hit_us(m, 3))]
+        elif "pick" in self.flags:
+            cands = [m for m in mechs if threatening(m)]
+        else:
+            cands = mechs
         target = min(cands, key=threat_score) if cands else None
         # a visible mech we chose not to fight: keep our front armour (and eyes) on it and get out of its sight
         watch = None
-        if target is None and "pick" in self.flags:
+        if target is None and selective:
             vis = [m for m in mechs if m["los"] and m["d"] < 180]
             watch = min(vis, key=lambda m: m["d"]) if vis else None
         if target is not None:
@@ -311,13 +415,14 @@ class Bot:
 
         # ---- choose movement
         crept = False
+        tag = ""
         move = (0.0, 0.0)
         boost = False
         mode = "idle"
         aim = None
         shoot_target = None  # (pos, vel, kind, radius, height)
 
-        best_rank = max(WEAPON_RANK.get(k, -1) for k in kinds if k)
+        best_rank = max(self.rank.get(k, -1) for k in kinds if k)
 
         if target is not None:
             mode = "fight"
@@ -325,33 +430,47 @@ class Bot:
             # desired range depends on loadout
             has = set(k for k in kinds if k)
             if "laser" in has:
-                want_lo, want_hi = 60, 160
+                want_lo, want_hi = P["rng_laser_lo"], P["rng_laser_hi"]
             elif "lightning" in has:
-                want_lo, want_hi = 12, 32
+                want_lo, want_hi = P["rng_light_lo"], P["rng_light_hi"]
             elif "mortar" in has:
-                want_lo, want_hi = 50, 130
+                want_lo, want_hi = P["rng_mortar_lo"], P["rng_mortar_hi"]
             else:
-                want_lo, want_hi = 25, 70
+                want_lo, want_hi = P["rng_gun_lo"], P["rng_gun_hi"]
             their = set(target.get("weapons", []))
             if "lightning" in their and "lightning" not in has:
                 want_lo = max(want_lo, 55); want_hi = max(want_hi, 90)
             if "mortar" in their and "lightning" in has:
                 want_hi = min(want_hi, 25)
             n_los = len([m for m in mechs if m["los"] and m["d"] < 160])
-            losing = hp_frac < 0.35 and (target["hp"] > me["hp"] * 1.1 or n_los > 1)
-            if len(recent_att) >= 2 or n_los >= 3:
+            losing = hp_frac < P["flee_hp1"] and (target["hp"] > me["hp"] * P["flee_ratio1"] or n_los > 1)
+            if len(recent_att) >= P["flee_natt"] or n_los >= P["flee_nlos"]:
                 losing = True
-            if hp_frac < 0.5 and target["hp"] > me["hp"] * 1.3:
+            if hp_frac < P["flee_hp2"] and target["hp"] > me["hp"] * P["flee_ratio2"]:
                 losing = True
+            bold = shy = False
+            if "flank" in self.flags or "ambush" in self.flags:
+                if target["back"] and target["los"]:
+                    # its back is to us: rear hits do x1.5, so press in and keep shooting unless we're nearly dead
+                    bold = True
+                    want_lo, want_hi = max(6.0, want_lo * 0.5), max(15.0, want_hi * 0.6)
+                    if hp_frac > 0.25 and len(recent_att) < 2:
+                        losing = False
+                        self.flee_until = 0.0
+                elif target["faces"] and target["los"] and target["d"] > 40 and not (hp_frac > 0.7 and target["hp"] < me["hp"] * 0.6):
+                    # it's looking at us from range and we don't clearly outgun it: back off into cover, facing it
+                    shy = True
+                    losing = True
+            tag = "!" if bold else ("?" if shy else "")
             if losing:
-                self.flee_until = t + 2.0
+                self.flee_until = t + P["flee_hold"]
             elif t < self.flee_until:
                 losing = True
             tx, ty = target["pos"][0], target["pos"][1]
             bx, by = (tx - x) / max(target["d"], 0.1), (ty - y) / max(target["d"], 0.1)
             if t > self.strafe_until:
                 self.strafe_dir = random.choice((-1, 1))
-                self.strafe_until = t + random.uniform(0.3, 0.9)
+                self.strafe_until = t + random.uniform(P["strafe_min"], max(P["strafe_min"], P["strafe_max"]))
             px, py = -by * self.strafe_dir, bx * self.strafe_dir
             if losing:
                 mode = "flee"
@@ -360,15 +479,17 @@ class Bot:
                     move, _ = self.nav_to(me, spot[0], spot[1])
                 else:
                     move = (-bx + px * 0.5, -by + py * 0.5)
-                boost = me["energy"] > 15
+                boost = me["energy"] > P["flee_boost_e"]
             else:
                 radial = 0.0
                 if target["d"] > want_hi:
-                    radial = 0.8
+                    radial = P["radial"]
                 elif target["d"] < want_lo:
-                    radial = -0.8
+                    radial = -P["radial"]
                 move = (px + bx * radial, py + by * radial)
-                boost = me["energy"] > 45 and target["d"] < 150
+                boost = me["energy"] > P["fight_boost_e"] and target["d"] < P["fight_boost_d"]
+                if bold:
+                    boost = me["energy"] > 25
             if need_zone and (not in_zone or dcur > cur_r - 15):
                 zv, _ = self.nav_to(me, self.hide[0], self.hide[1])
                 move = (zv[0] * 1.0 + move[0] * 0.4, zv[1] * 1.0 + move[1] * 0.4)
@@ -385,12 +506,15 @@ class Bot:
                 else:
                     mode = goal[2]
             zone_calm = in_zone and dcur < cur_r - 30 and not need_zone
+            if self.phase != "normal":
+                goal, mode = self.opening(me, t, in_zone, dcur, cur_r, dnext, nr, margin, goal, mode)
             if watch is not None and mode != "zone" and watch["d"] < 140:
                 spot = self.cover_from(me, [watch])
                 if spot:
                     goal = (spot[0], spot[1], "avoid"); mode = "avoid"
             if goal is not None:
-                weighted = "cover" in self.flags and mode not in ("zone", "avoid") and zone_calm
+                opening = mode in ("center", "transit") and dcur < cur_r - 40
+                weighted = ("cover" in self.flags and mode not in ("zone", "avoid") and zone_calm) or opening
                 mv, rem = self.nav_to(me, goal[0], goal[1], weighted=weighted)
                 move = mv
                 if mode == "avoid" and rem < 2:
@@ -405,7 +529,7 @@ class Bot:
                     move = (move[0] * k, move[1] * k)
                 # creep: footsteps start at sound.step_speed and carry sound.range.step (40 m); only worth the lost
                 # speed when someone was close lately and the zone leaves time for it
-                elif "creep" in self.flags and mode not in ("zone",) and zone_calm and t - self.contact_t < 6:
+                elif ("creep" in self.flags or opening) and mode not in ("zone",) and (zone_calm or opening) and t - self.contact_t < 6:
                     lim = 0.92 * self.cfg.get("sound", {}).get("step_speed", 5.0)
                     k = min(1.0, lim / max(me["stats"].get("walk_speed", 11.7), 1))
                     move = (move[0] * k, move[1] * k)
@@ -447,13 +571,49 @@ class Bot:
                 fire[i] = w["charge"] < w["stats"].get("charge", 0.75) + 1.5  # hold rather than waste
         act["fire"] = fire
         g = weapons[0] if kinds[0] == "gun" else (weapons[1] if kinds[1] == "gun" else None)
-        if g and g["reload"] == 0 and g["ammo"] < g["stats"]["mag"] * 0.5 and not any(fire) and mode not in ("fight", "flee"):
+        rfrac = P["gun_reload_" + self.stage] if "gunwise" in self.flags else 0.5
+        if g and g["reload"] == 0 and g["ammo"] < g["stats"]["mag"] * rfrac and not any(fire) and mode not in ("fight", "flee"):
             act["reload"] = True
         self.last_mode = mode
-        mf.draw.label(f"{mode}{'~' if crept else ''} hp{me['hp']:.0f} e{me['energy']:.0f}")
+        mf.draw.label(f"{mode}{tag}{'~' if crept else ''} hp{me['hp']:.0f} e{me['energy']:.0f}")
         return act
 
     # ------------------------------------------------------------------ sub-behaviours
+    def opening(self, me, t, in_zone, dcur, cur_r, dnext, nr, margin, goal, mode):
+        """B1: first walk to a half-sheltered spot near the map centre, then to the zone through cover, then normal play."""
+        x, y = me["pos"][0], me["pos"][1]
+        if self.phase == "center":
+            if self.center_spot is None:
+                self.center_spot = self.find_center_spot() or (x, y)
+            sp = self.center_spot
+            # cut it short if the zone edge is getting close or it's taking too long
+            if d2((x, y), sp) < 6 or not in_zone or dcur > cur_r - 40 or t > 100:
+                self.phase = "transit"
+            else:
+                return (sp[0], sp[1], "center"), "center"
+        if self.phase == "transit":
+            if in_zone and dnext < nr - margin * 0.5:
+                self.phase = "normal"
+            else:
+                return (self.hide[0], self.hide[1], "transit"), "transit"
+        return goal, mode
+
+    def find_center_spot(self):
+        """Walkable cell closest to the map centre that is partly open (exposure 0.35-0.75: not bare, not buried)."""
+        import numpy as np
+        g = self.geo
+        cx, cy = g.x0 + g.nx / 2, g.y0 + g.ny / 2
+        ii = np.arange(g.W) * 2 + g.x0 + 1
+        jj = np.arange(g.H) * 2 + g.y0 + 1
+        d = np.hypot(ii[None, :] - cx, jj[:, None] - cy)
+        ok = g.free & (d < 120) & (g.exposure > 0.35) & (g.exposure < 0.75)
+        if not ok.any():
+            ok = g.free & (d < 120)
+        if not ok.any():
+            return None
+        j, i = divmod(int(np.argmin(np.where(ok, d, 1e9))), g.W)
+        return g.cell_xy(j, i)
+
     loot_target = None
 
     def loot_goal(self, me, obs, npcs, kinds, t, cur_c, cur_r):
@@ -462,6 +622,8 @@ class Bot:
         hp_frac = me["hp"] / max(1, me["max_hp"])
         self.loot_target = None
         best = None
+        P = self.P
+        lr = 0.5 if "ambush" in self.flags else 1.0   # A8 hides more: loot only what is close
 
         def inzone(p, pad=15):
             return d2(p, cur_c) < cur_r - pad
@@ -471,16 +633,16 @@ class Bot:
 
         # weapons
         have = [k for k in kinds if k]
-        worst = min((WEAPON_RANK[k] for k in have if k != "gun"), default=-1)
+        worst = min((self.rank[k] for k in have if k != "gun"), default=-1)
         for p in obs.get("pickups", []):
             if self.blacklist.get(p["id"], 0) > t or p["kind"] in have:
                 continue
-            r = WEAPON_RANK.get(p["kind"], -1)
+            r = self.rank.get(p["kind"], -1)
             if kinds[1] is not None and r <= worst:
                 continue
             d = d2(p["pos"], (x, y))
-            if d < 90 and inzone(p["pos"]) and reachable(p["pos"]):
-                sc = d - r * 15
+            if d < P["loot_w_range"] * lr and inzone(p["pos"]) and reachable(p["pos"]):
+                sc = d - r * P["loot_w_rank"]
                 if best is None or sc < best[0]:
                     best = (sc, p["pos"][0], p["pos"][1], "weapon")
         # cubes
@@ -488,8 +650,8 @@ class Bot:
             if self.blacklist.get(c["id"], 0) > t:
                 continue
             d = d2(c["pos"], (x, y))
-            if d < 70 and inzone(c["pos"]) and reachable(c["pos"]):
-                sc = d - 10
+            if d < P["loot_c_range"] * lr and inzone(c["pos"]) and reachable(c["pos"]):
+                sc = d - P["loot_c_bonus"]
                 if best is None or sc < best[0]:
                     best = (sc, c["pos"][0], c["pos"][1], "cube")
         # supply drops
@@ -514,12 +676,17 @@ class Bot:
                     return gx, gy, "npc"
                 return x, y, "npc"
         # crates
-        if hp_frac > 0.6:
+        crates_ok = hp_frac > P["crate_hp"]
+        if "ambush" in self.flags:
+            crates_ok = hp_frac > 0.9
+        if "gunwise" in self.flags and self.stage == "late":
+            crates_ok = False   # late game: no gunfire just for loot
+        if crates_ok:
             mz = self.muzzle(me)
             cands = []
             for c in obs.get("crates", []):
                 d = d2(c["pos"], (x, y))
-                if d < 70 and inzone(c["pos"], 5) and self.geo.los(mz, (c["pos"][0], c["pos"][1], c["pos"][2] + 1.2)):
+                if d < P["crate_range"] * lr and inzone(c["pos"], 5) and self.geo.los(mz, (c["pos"][0], c["pos"][1], c["pos"][2] + 1.2)):
                     cands.append((d, c))
             if cands:
                 d, c = min(cands, key=lambda q: q[0])
@@ -535,7 +702,7 @@ class Bot:
         worst_slot = None
         if kinds[1] is not None:
             # replace the worse non-gun weapon (slot 1 normally)
-            cand = [(WEAPON_RANK.get(kinds[i], -1), i) for i in (0, 1) if kinds[i] and kinds[i] != "gun"]
+            cand = [(self.rank.get(kinds[i], -1), i) for i in (0, 1) if kinds[i] and kinds[i] != "gun"]
             if cand:
                 worst_slot = min(cand)[1]
         for p in obs.get("pickups", []):
@@ -546,7 +713,7 @@ class Bot:
             if kinds[1] is None or kinds[0] is None:
                 act["take"] = p["id"]
                 return
-            if worst_slot is not None and WEAPON_RANK.get(p["kind"], -1) > WEAPON_RANK.get(kinds[worst_slot], -1):
+            if worst_slot is not None and self.rank.get(p["kind"], -1) > self.rank.get(kinds[worst_slot], -1):
                 w = me["weapons"][worst_slot]
                 if w["kind"] == "laser" and w.get("charge", 0) > 0:
                     continue
@@ -654,10 +821,11 @@ class Bot:
                 continue
             k = w["kind"]; st = w["stats"]
             if k == "gun":
-                if los and dist < st["range"] * 0.95 and w["cooldown"] <= 0.1 and w["ammo"] > 0 and w["reload"] == 0:
+                if los and dist < st["range"] * 0.95 and w["cooldown"] <= 0.1 and w["ammo"] > 0 and w["reload"] == 0 \
+                        and self.gun_worth_it(tg, dist, rad, vel, st, mz):
                     lp = self.lead(mz, tp, vel, st["speed"])
                     ga = self.aim_at(mz, lp)
-                    gt = tol * 1.6 + 0.012
+                    gt = tol * self.P["gun_tol"] + 0.012
                     if abs(wrap(cur[0] - ga[0])) < gt and abs(cur[1] - ga[1]) < gt:
                         fire[i] = True
             elif k == "laser":
@@ -687,6 +855,23 @@ class Bot:
                     if sol and abs(wrap(cur[0] - sol[0])) < 0.03 and abs(cur[1] - sol[1]) < 0.03:
                         fire[i] = True
         return aim, fire
+
+    def gun_worth_it(self, tg, dist, rad, vel, st, mz):
+        """A9: open fire with the gun only inside this stage's range (unless it is shooting us) and when a shot has a
+        fair chance: spread (spread_deg) plus lead error from the target's sideways speed, against its radius."""
+        if "gunwise" not in self.flags:
+            return True
+        P = self.P
+        hit_us = tg.get("kind") == "mech" and tg.get("id") in self.attackers and self.attackers[tg["id"]] > self.t_now - 4
+        if dist > P["gun_maxd_" + self.stage] and not hit_us:
+            return False
+        dx, dy = tg["pos"][0] - mz[0], tg["pos"][1] - mz[1]
+        L = max(math.hypot(dx, dy), 1e-3)
+        v_side = abs(vel[0] * (-dy / L) + vel[1] * (dx / L))
+        tof = dist / max(st.get("speed", 252), 1)
+        sig = math.hypot(dist * math.tan(math.radians(st.get("spread_deg", 0.6))), 0.35 * v_side * tof + 0.3)
+        p_hit = 1 - math.exp(-(rad * rad) / (2 * sig * sig))
+        return p_hit >= P["gun_phit_" + self.stage] or hit_us
 
     def weapon_value(self, kind, dist, los, w):
         if kind == "laser":
