@@ -79,6 +79,7 @@ VERSIONS = {
     "C7": "gunwise",            # laser kiting: hold 120-150 m with a laser
     "C8": "gunwise,dodge",      # sidestep charging lasers aimed at us and incoming mortar shells
     "C9": "gunwise,heal",       # C5 + C6: heal between fights, and one fight at a time
+    "D1": "gunwise",            # A9, fight harder: retreat only when nearly dead or swarmed
 }
 # Per-version setting overrides, applied on top of PARAMS (SURVIVOR_PARAMS still overrides both).
 VERSION_PARAMS = {
@@ -95,8 +96,8 @@ VERSION_PARAMS = {
     "B7": {"end_flee_hp1": 0.5, "end_flee_hp2": 0.7},
 }
 VERSION_PARAMS.update({"C1": VERSION_PARAMS["B4"], "C2": VERSION_PARAMS["B5"], "C3": VERSION_PARAMS["B6"], "C4": VERSION_PARAMS["B7"],
-                       "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
-DEFAULT_VERSION = "C9"
+                       "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "D1": {"flee_hp1": 0.2, "flee_hp2": 0.3, "flee_natt": 3, "flee_nlos": 4}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
+DEFAULT_VERSION = "D1"
 
 
 def load_params(version=None):
