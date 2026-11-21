@@ -54,7 +54,7 @@ VERSIONS = {
     "A9": "gunwise",              # stage-aware gun use
     "B1": "center",               # walk to a half-sheltered spot near the map centre, then to the zone through cover
 }
-DEFAULT_VERSION = "B1"
+DEFAULT_VERSION = "A8"
 
 
 def load_params():
