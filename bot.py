@@ -52,6 +52,8 @@ PARAMS = {
     "tp_bonus": 60.0, "tp_lo": 50.0, "tp_hi": 110.0,
     # laser corner peek (AF): nearest target range for it
     "lp_lo": 45.0,
+    # hold ground (AK): don't trek to a hide spot further than this when idle
+    "sp_d": 60.0,
     # I-series repair: heal when under rep_lo, or under rep_hi inside the quiet window after a kill (rep_kill s)
     "rep_lo": 0.55, "rep_hi": 0.9, "rep_kill": 8.0,
     # X10 profile: easy kills (hp under easy_hp, within easy_d, back turned, or shooting us); harvest until a second
@@ -103,6 +105,26 @@ VERSIONS = {
     "G4": "gunwise,dodge,holdspot",           # C8 + fight from the pre-chosen covered spot when the target is in range
     "G5": "gunwise,dodge,adapt",              # C8 + learn press vs space during the match (damage out - in)
     "G6": "gunwise,dodge,holdspot,adapt",     # G4 + G5
+    "AL1": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,crowdrange",  # AC3 + keep 40 m further out against a crowd or when hurt
+    "AL2": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,nodrone",  # AC3 + stop farming NPC drones
+    "AL3": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,strafe2",  # AC3 + steady 2.2 s strafe rhythm
+    "AL4": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,lethal,treefire,memfire,crowdrange,nodrone,strafe2",  # AG4 + AL1 + AL2 + AL3
+    "AK1": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,stayput",  # AC3 + hold ground instead of trekking to a far hide spot
+    "AK2": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,stayput",  # AC3 + always hold ground unless the zone moves us
+    "AK3": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,upg3",  # AC3 + laser/lightning-first upgrade order
+    "AK4": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,lethal,treefire,memfire,stayput,upg3",  # AG4 + AK1 + AK3
+    "AJ1": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,skilladapt",  # AC3 + adapt to each house bot's measured skill
+    "AJ2": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,hunterwatch",  # AC3 + leave bystander house bots alone
+    "AJ3": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,skilladapt,hunterwatch",  # AJ1 + AJ2
+    "AJ4": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,lethal,treefire,memfire,skilladapt,hunterwatch",  # AG4 + AJ3
+    "AI1": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost",  # AC3 + head for the next circle 45 s early
+    "AI2": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost",  # AC3 + head for the next circle 60 s early
+    "AI3": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost",  # AC3 + hide deeper inside the next circle
+    "AI4": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost",  # AI2 + AI3
+    "AH1": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,canopyrest",  # AC3 + heal under tree cover
+    "AH2": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,lateheal",  # AC3 + late game: heal before opening new fights
+    "AH3": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,canopyrest,lateheal",  # AH1 + AH2
+    "AH4": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,lethal,treefire,memfire,canopyrest,lateheal",  # AG4 + AH3
     "AG1": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,lethal",  # AC3 + release a partial laser beam once it kills
     "AG2": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,treefire",  # AC3 + gun fire at heard mechs hidden in trees
     "AG3": "gunwise,dodge,holdspot,midcube,precharge,repair,memory,reloadwait,finish,travelboost,memfire",  # AC3 + keep firing where a just-lost target should be
@@ -240,8 +262,8 @@ VERSION_PARAMS = {
     "B7": {"end_flee_hp1": 0.5, "end_flee_hp2": 0.7},
 }
 VERSION_PARAMS.update({"C1": VERSION_PARAMS["B4"], "C2": VERSION_PARAMS["B5"], "C3": VERSION_PARAMS["B6"], "C4": VERSION_PARAMS["B7"],
-                       "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "D1": {"flee_hp1": 0.2, "flee_hp2": 0.3, "flee_natt": 3, "flee_nlos": 4}, "D2": {"crate_range": 150, "loot_c_range": 110}, "E2": VERSION_PARAMS["B6"], "G2": {"zone_lead": 60}, "H2": {"zone_lead": 60}, "L4": {"rep_lo": 0.6, "rep_hi": 0.95, "rep_kill": 10}, "M1": {"rep_lo": 0.6, "rep_hi": 0.95, "rep_kill": 10}, "AG1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AG2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AG3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AG4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AF5": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "lp_lo": 45}, "AF6": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "lp_lo": 45}, "AF1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "lp_lo": 45}, "AF2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "lp_lo": 80}, "AF3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AF4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "lp_lo": 45}, "AE1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AE2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AE3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AE4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "DUAL": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AD1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AD2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AD3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AD4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AC1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AC2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AC3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AC4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AB1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 60, "tp_lo": 50, "tp_hi": 110}, "AB2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 60, "tp_lo": 35, "tp_hi": 80}, "AB3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AB4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 60, "tp_lo": 70, "tp_hi": 140}, "Z1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "Z2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "Z3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "Z4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "Y1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 30, "rng_gun_hi": 70}, "Y2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 25, "rng_gun_hi": 85}, "Y3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 40, "rng_gun_hi": 100}, "Y4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 30, "rng_gun_hi": 85}, "W1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 20, "rng_gun_hi": 55}, "W2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 35, "rng_gun_hi": 85}, "W3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "flee_hp1": 0.25, "flee_hp2": 0.4}, "W4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "flee_hp1": 0.45, "flee_hp2": 0.6}, "V1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "V2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "V3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "V4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "U1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.1}, "U2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.0}, "U3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "U4": {"rep_lo": 0.65, "rep_hi": 1.0, "rep_kill": 12, "hold_range": 1.2}, "T1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "T2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "T3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "T4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 25, "hold_range": 1.3}, "S1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "S2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.4}, "S3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "S4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 25, "hold_range": 1.3}, "R1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.5}, "R2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.8}, "R3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "R4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3, "crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "Q1": {"rep_lo": 0.8, "rep_hi": 1.0, "rep_kill": 25}, "Q2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "Q3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15}, "Q4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15}, "P1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15}, "P2": {"rep_lo": 0.65, "rep_hi": 1.0, "rep_kill": 12}, "P3": {"rep_lo": 0.7, "rep_hi": 1.0, "rep_kill": 12, "crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "P4": {"rep_lo": 0.85, "rep_hi": 1.0, "rep_kill": 20}, "O1": {"rep_lo": 0.65, "rep_hi": 1.0, "rep_kill": 12}, "O2": {"rep_lo": 0.6, "rep_hi": 0.95, "rep_kill": 10, "crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "O3": {"rep_lo": 0.6, "rep_hi": 0.95, "rep_kill": 10}, "O4": {"rep_lo": 0.65, "rep_hi": 1.0, "rep_kill": 12, "crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "N1": {"crate_range": 150, "crate_hp": 0.45}, "N2": {"loot_c_range": 150, "loot_c_bonus": 30}, "N4": {"crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "J2": {"rng_gun_lo": 20, "rng_gun_hi": 40, "flee_hp1": 0.15, "flee_hp2": 0.2, "ts_nolos": 20}, "H4": {"hold_range": 1.4}, "G3": {"zone_lead": 60}, "F1": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "F2": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.35, "bz_back": 0.6}, "F3": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "X20": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X21": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X22": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X23": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.3, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X24": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.4}, "X25": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.75, "heal_lo_late": 0.65}, "X26": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X27": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X10": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X11": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X12": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X13": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X14": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X15": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X16": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X17": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X18": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X19": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
-DEFAULT_VERSION = "AG4"
+                       "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "D1": {"flee_hp1": 0.2, "flee_hp2": 0.3, "flee_natt": 3, "flee_nlos": 4}, "D2": {"crate_range": 150, "loot_c_range": 110}, "E2": VERSION_PARAMS["B6"], "G2": {"zone_lead": 60}, "H2": {"zone_lead": 60}, "L4": {"rep_lo": 0.6, "rep_hi": 0.95, "rep_kill": 10}, "M1": {"rep_lo": 0.6, "rep_hi": 0.95, "rep_kill": 10}, "AL1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AL2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AL3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AL4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AK1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "sp_d": 60}, "AK2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "sp_d": 0}, "AK3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AK4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "sp_d": 60}, "AJ1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AJ2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AJ3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AJ4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AI1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "zone_lead": 45}, "AI2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "zone_lead": 60}, "AI3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "zone_margin": 45, "zone_margin_frac": 0.5}, "AI4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "zone_lead": 60, "zone_margin": 45, "zone_margin_frac": 0.5}, "AH1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AH2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AH3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AH4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AG1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AG2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AG3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AG4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AF5": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "lp_lo": 45}, "AF6": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "lp_lo": 45}, "AF1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "lp_lo": 45}, "AF2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "lp_lo": 80}, "AF3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AF4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "lp_lo": 45}, "AE1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AE2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AE3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AE4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "DUAL": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AD1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AD2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AD3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AD4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AC1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AC2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AC3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "AC4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AB1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 60, "tp_lo": 50, "tp_hi": 110}, "AB2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 60, "tp_lo": 35, "tp_hi": 80}, "AB3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 120, "tp_lo": 50, "tp_hi": 110}, "AB4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "tp_bonus": 60, "tp_lo": 70, "tp_hi": 140}, "Z1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "Z2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "Z3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "Z4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "Y1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 30, "rng_gun_hi": 70}, "Y2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 25, "rng_gun_hi": 85}, "Y3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 40, "rng_gun_hi": 100}, "Y4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 30, "rng_gun_hi": 85}, "W1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 20, "rng_gun_hi": 55}, "W2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "rng_gun_lo": 35, "rng_gun_hi": 85}, "W3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "flee_hp1": 0.25, "flee_hp2": 0.4}, "W4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2, "flee_hp1": 0.45, "flee_hp2": 0.6}, "V1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "V2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "V3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "V4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "U1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.1}, "U2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.0}, "U3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "U4": {"rep_lo": 0.65, "rep_hi": 1.0, "rep_kill": 12, "hold_range": 1.2}, "T1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "T2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "T3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "T4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 25, "hold_range": 1.3}, "S1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.2}, "S2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.4}, "S3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "S4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 25, "hold_range": 1.3}, "R1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.5}, "R2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.8}, "R3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "R4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3, "crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "Q1": {"rep_lo": 0.8, "rep_hi": 1.0, "rep_kill": 25}, "Q2": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15, "hold_range": 1.3}, "Q3": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15}, "Q4": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15}, "P1": {"rep_lo": 0.75, "rep_hi": 1.0, "rep_kill": 15}, "P2": {"rep_lo": 0.65, "rep_hi": 1.0, "rep_kill": 12}, "P3": {"rep_lo": 0.7, "rep_hi": 1.0, "rep_kill": 12, "crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "P4": {"rep_lo": 0.85, "rep_hi": 1.0, "rep_kill": 20}, "O1": {"rep_lo": 0.65, "rep_hi": 1.0, "rep_kill": 12}, "O2": {"rep_lo": 0.6, "rep_hi": 0.95, "rep_kill": 10, "crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "O3": {"rep_lo": 0.6, "rep_hi": 0.95, "rep_kill": 10}, "O4": {"rep_lo": 0.65, "rep_hi": 1.0, "rep_kill": 12, "crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "N1": {"crate_range": 150, "crate_hp": 0.45}, "N2": {"loot_c_range": 150, "loot_c_bonus": 30}, "N4": {"crate_range": 150, "crate_hp": 0.45, "loot_c_range": 150, "loot_c_bonus": 30}, "J2": {"rng_gun_lo": 20, "rng_gun_hi": 40, "flee_hp1": 0.15, "flee_hp2": 0.2, "ts_nolos": 20}, "H4": {"hold_range": 1.4}, "G3": {"zone_lead": 60}, "F1": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "F2": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.35, "bz_back": 0.6}, "F3": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "X20": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X21": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X22": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X23": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.3, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X24": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.4}, "X25": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.75, "heal_lo_late": 0.65}, "X26": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X27": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X10": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X11": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X12": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X13": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X14": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X15": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X16": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X17": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X18": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X19": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
+DEFAULT_VERSION = "AL2"
 
 
 def load_params(version=None):
@@ -265,6 +287,9 @@ UPGRADE_PREF = ["plating", "armor", "nanites", "laser_damage", "laser_charge", "
                 "lightning_chain", "laser_pierce"]
 
 
+UPGRADE_PREF3 = ["laser_damage", "laser_charge", "lightning_efficiency", "lightning_range", "plating", "gun_mag", "servos",
+                 "armor", "nanites", "gun_damage", "gun_rate", "gun_velocity", "reactor", "jets", "capacitor", "gyros", "sensors",
+                 "lightning_chain", "laser_pierce", "mortar_reload", "mortar_velocity", "mortar_splash"]
 UPGRADE_PREF2 = ["plating", "armor", "nanites", "lightning_efficiency", "laser_damage", "laser_charge", "gun_damage",
                  "gun_rate", "lightning_range", "lightning_chain", "gyros", "servos", "gun_mag", "capacitor", "reactor", "jets",
                  "gun_velocity", "sensors", "mortar_reload", "mortar_velocity", "mortar_splash", "laser_pierce"]
@@ -332,6 +357,8 @@ class Bot:
         # B2/B3: is this a free-for-all? Practice house bots never kill each other, so any death we didn't cause
         # (zone deaths aside) means other mechs are fighting each other.
         self.base_flags = set(self.flags)
+        self.canopy_g = self.geo._canopy(hello["map"]["dir"]) if "canopyrest" in self.flags else None
+        self.canopy_spot = None; self.canopy_t = -99.0
         if "dual" in self.flags:
             import mu2bot
             t1 = time.time()
@@ -353,6 +380,7 @@ class Bot:
         self.flee_spot = None; self.flee_spot_t = -99.0
         self.lp_on = False; self.lp_peek = None; self.last_hit_on = {}
         self.seen_mech = {}; self.mech_snd = None
+        self.dmg_from = {}; self.expo = {}; self.close_ema = {}
         self.laser_snd = None; self.laser_snd_until = 0.0
         self.bs_bearing = None; self.bs_until = 0.0
         self.hide = None         # (x, y) chosen hiding spot
@@ -557,7 +585,7 @@ class Bot:
         # ---- offers
         if obs.get("offer"):
             ch = obs["offer"]["choices"]
-            pref = UPGRADE_PREF2 if "upg2" in self.flags else UPGRADE_PREF
+            pref = UPGRADE_PREF3 if "upg3" in self.flags else (UPGRADE_PREF2 if "upg2" in self.flags else UPGRADE_PREF)
             best = min(range(len(ch)), key=lambda k: pref.index(ch[k]["id"]) if ch[k]["id"] in pref else 99)
             act["pick"] = best
 
@@ -568,6 +596,7 @@ class Bot:
                 self.threat_until = t + 2.5
                 if e.get("by") is not None:
                     self.attackers[e["by"]] = t
+                    self.dmg_from[e["by"]] = self.dmg_from.get(e["by"], 0.0) + e.get("amount", 0.0)
                 if e.get("rear") or e.get("by") not in {m["id"] for m in obs.get("mechs", [])}:
                     self.bs_bearing = e["bearing"]; self.bs_until = t + 0.65
             elif e["type"] == "kill":
@@ -654,6 +683,11 @@ class Bot:
         for m in mechs:
             to_us = math.atan2(y - m["pos"][1], x - m["pos"][0])
             m["off"] = abs(wrap(m["aim"][0] - to_us)) if m.get("aim") else math.pi / 2
+            if m["los"] and m["off"] < 0.6:
+                self.expo[m["id"]] = self.expo.get(m["id"], 0.0) + 0.1
+            if m.get("vel"):
+                vc = m["vel"][0] * math.cos(to_us) + m["vel"][1] * math.sin(to_us)
+                self.close_ema[m["id"]] = 0.9 * self.close_ema.get(m["id"], vc) + 0.1 * vc
             if "memfire" in self.flags:
                 self.seen_mech[m["id"]] = (t, list(m["pos"]), list(m.get("vel") or [0, 0, 0]))
             m["back"] = m["off"] > arc + 0.15
@@ -684,6 +718,9 @@ class Bot:
                 s -= P["tp_bonus"]
             if m["id"] == self.cur_target and t - self.cur_target_t < 3:
                 s -= P["ts_sticky"]
+            if "hunterwatch" in self.flags and m["d"] > 60 and self.close_ema.get(m["id"], 0.0) < 1.0 and m["off"] > 0.8 \
+                    and not (m["id"] in self.attackers and t - self.attackers[m["id"]] < 8):
+                s += 60   # AJ2: a bystander, not hunting us: leave it be
             if "flank" in self.flags or "ambush" in self.flags:
                 if m["back"]:
                     s -= 70   # prefer backs
@@ -823,6 +860,8 @@ class Bot:
                     # it's looking at us from range and we don't clearly outgun it: back off into cover, facing it
                     shy = True
                     losing = True
+            if "crowdrange" in self.flags and (hp_frac < 0.35 or sum(1 for m in mechs if m["d"] < 100) >= 3):
+                want_lo, want_hi = want_lo + 40, want_hi + 40   # AL1: more room against a crowd or when hurt
             if "finish" in self.flags and target["hp"] < 0.3 * target.get("max_hp", target["hp"] + 1) and hp_frac > 0.5:
                 losing = False
                 self.flee_until = 0.0
@@ -854,6 +893,9 @@ class Bot:
                 losing = self.bz_retreat   # numbers or a stronger enemy never make us break off; low HP does
                 if not losing:
                     self.flee_until = 0.0
+            if "lateheal" in self.flags and obs.get("alive", 16) <= 5 and hp_frac < 0.95 and target["d"] > 45 \
+                    and not any(t - tt < 3 for tt in self.attackers.values()):
+                losing = True; self.flee_until = 0.0   # AH2: heal up first, let the others fight
             if "crowd" in self.flags and n_los >= 2 and any(t - tt < 3 for tt in self.attackers.values()):
                 losing = True   # X10: 2+ enemies have a line on us and we are the one being shot: get out
             if "heal" in self.flags:
@@ -862,6 +904,12 @@ class Bot:
                     losing = True   # C5: break line of sight and regenerate instead of trading while hurt
                 elif hp_frac < P["heal_start"] and not engaged and target["d"] > 45:
                     losing = True   # C5: don't open a new fight below heal_start
+            if "skilladapt" in self.flags and self.expo.get(target["id"], 0.0) >= 3.0:
+                dps = self.dmg_from.get(target["id"], 0.0) / self.expo[target["id"]]
+                if dps < 25 and hp_frac > 0.3 and n_los <= 1:
+                    losing = False; self.flee_until = 0.0   # AJ1: a weak shooter: keep fighting
+                elif dps > 80 and hp_frac < 0.55:
+                    losing = True   # AJ1: a strong one: break off earlier
             tag = "!" if bold else ("?" if shy else "")
             if losing:
                 self.flee_until = t + P["flee_hold"]
@@ -872,6 +920,8 @@ class Bot:
             if t > self.strafe_until:
                 self.strafe_dir = random.choice((-1, 1))
                 self.strafe_until = t + random.uniform(P["strafe_min"], max(P["strafe_min"], P["strafe_max"]))
+            if "strafe2" in self.flags:
+                self.strafe_dir = 1 if int(t / 2.2) % 2 == 0 else -1
             px, py = -by * self.strafe_dir, bx * self.strafe_dir
             if losing:
                 mode = "flee"
@@ -980,6 +1030,10 @@ class Bot:
                     spot = self.cover_from(me, [{"pos": [lt[0], lt[1], lt[2]], "d": d2(lt, (x, y)), "id": -7}])
                     if spot:
                         goal = spot
+                if self.canopy_g is not None:
+                    cs = self.canopy_rest(me, t, cur_c, cur_r)
+                    if cs is not None:
+                        goal = cs
                 goal = (goal[0], goal[1], "repair")
             elif ("heal" in self.flags and self.healing) or ("berserk" in self.flags and self.bz_retreat):
                 goal = self.hide; mode = "heal"
@@ -989,6 +1043,8 @@ class Bot:
                 goal = self.loot_goal(me, obs, npcs, kinds, t, cur_c, cur_r)
                 if goal is None:
                     goal = self.hide; mode = "hide"
+                    if "stayput" in self.flags and self.hide is not None and d2(self.hide, (x, y)) > P["sp_d"]:
+                        goal = (x, y); mode = "hold"   # AK: hold ground, the zone logic moves us when it must
                 else:
                     mode = goal[2]
             zone_calm = in_zone and dcur < cur_r - 30 and not need_zone
@@ -1426,7 +1482,7 @@ class Bot:
                     best = (sc, pos[0], pos[1], "weapon" if kind != "cube" else "cube")
         if best is not None:
             return best[1], best[2], best[3]
-        if "memory" in self.flags and hp_frac > 0.5:
+        if "memory" in self.flags and hp_frac > 0.5 and "nodrone" not in self.flags:
             # farm remembered drones: walk into gun range (~38 m) of the nearest one
             dr = [(d2(pos, (x, y)), pos) for mid, (kind, pos, ts) in self.mem.items() if kind == "npc" and d2(pos, (x, y)) < 170]
             if dr and not any(n["los"] and n["d"] < 90 for n in npcs):
@@ -1434,8 +1490,8 @@ class Bot:
                 if dd > 38:
                     return pos[0], pos[1], "npc"
         # NPC drones: farm cubes when healthy
-        if hp_frac > 0.7:
-            cands = [n for n in npcs if n["d"] < (140 if "econ" in self.flags else 90) and n["los"] and inzone(n["pos"], 5)]
+        if hp_frac > (0.85 if "nodrone" in self.flags else 0.7):
+            cands = [n for n in npcs if n["d"] < (65 if "nodrone" in self.flags else 140 if "econ" in self.flags else 90) and n["los"] and inzone(n["pos"], 5)]
             if cands:
                 n = min(cands, key=lambda n: n["d"] + n["hp"] * 0.1)
                 self.loot_target = n
@@ -1656,6 +1712,28 @@ class Bot:
                     if sol and abs(wrap(cur[0] - sol[0])) < 0.03 and abs(cur[1] - sol[1]) < 0.03:
                         fire[i] = True
         return aim, fire
+
+    def canopy_rest(self, me, t, cur_c, cur_r):
+        """AH1: the densest tree cover within 40 m (crowns hide mechs from anyone beyond 45 m)."""
+        x, y = me["pos"][0], me["pos"][1]
+        if self.canopy_spot is not None and t - self.canopy_t < 10:
+            return self.canopy_spot
+        g = self.geo; best = None
+        for dx in range(-40, 41, 4):
+            for dy in range(-40, 41, 4):
+                if dx * dx + dy * dy > 1600:
+                    continue
+                px, py = x + dx, y + dy
+                j, i = g.cell(px, py)
+                c = float(self.canopy_g[j, i])
+                if c < 0.6 or not g.is_free(px, py) or d2((px, py), cur_c) > cur_r - 25:
+                    continue
+                sc = c * 50 - math.hypot(dx, dy)
+                if best is None or sc > best[0]:
+                    best = (sc, px, py)
+        self.canopy_t = t
+        self.canopy_spot = (best[1], best[2]) if best else None
+        return self.canopy_spot
 
     def blind_fire(self, me, t, mz, weapons):
         """AG2/AG3: gun shots at mechs we can't see but know are there (trees hide mechs, they don't stop shots)."""
