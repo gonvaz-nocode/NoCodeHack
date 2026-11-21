@@ -87,7 +87,7 @@ VERSION_PARAMS = {
     "B7": {"end_flee_hp1": 0.5, "end_flee_hp2": 0.7},
 }
 VERSION_PARAMS.update({"C1": VERSION_PARAMS["B4"], "C2": VERSION_PARAMS["B5"], "C3": VERSION_PARAMS["B6"], "C4": VERSION_PARAMS["B7"]})
-DEFAULT_VERSION = "B9"
+DEFAULT_VERSION = "C1"
 
 
 def load_params(version=None):
