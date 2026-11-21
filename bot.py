@@ -89,6 +89,9 @@ VERSIONS = {
     "E3": "gunwise,dodge,dodgeb",        # C8 + dodge bullets too
     "F1": "gunwise,dodge,berserk",       # C8, extremely aggressive: chase hard, retreat only under 25% HP (back at 50%)
     "F2": "gunwise,dodge,berserk",       # F1, retreat under 35% (back at 60%)
+    "G1": "gunwise,dodge,laserfirst",             # C8 + laser first
+    "G2": "gunwise,dodge,fightcover",             # C8 + fight from a covered firing spot + head early for the next circle
+    "G3": "gunwise,dodge,fightcover,laserfirst",  # G2 + laser first
     "F3": "gunwise,dodge,berserk,laserfirst",  # F1 + grab a laser/lightning in sight before chasing mechs not shooting us
     "D1": "gunwise",            # A9, fight harder: retreat only when nearly dead or swarmed
     "D2": "gunwise,econ",       # A9 + economy loop: farm wider, opportunistic shots at crates and drones
@@ -126,8 +129,8 @@ VERSION_PARAMS = {
     "B7": {"end_flee_hp1": 0.5, "end_flee_hp2": 0.7},
 }
 VERSION_PARAMS.update({"C1": VERSION_PARAMS["B4"], "C2": VERSION_PARAMS["B5"], "C3": VERSION_PARAMS["B6"], "C4": VERSION_PARAMS["B7"],
-                       "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "D1": {"flee_hp1": 0.2, "flee_hp2": 0.3, "flee_natt": 3, "flee_nlos": 4}, "D2": {"crate_range": 150, "loot_c_range": 110}, "E2": VERSION_PARAMS["B6"], "F1": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "F2": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.35, "bz_back": 0.6}, "F3": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "X20": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X21": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X22": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X23": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.3, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X24": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.4}, "X25": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.75, "heal_lo_late": 0.65}, "X26": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X27": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X10": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X11": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X12": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X13": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X14": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X15": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X16": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X17": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X18": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X19": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
-DEFAULT_VERSION = "F3"
+                       "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "D1": {"flee_hp1": 0.2, "flee_hp2": 0.3, "flee_natt": 3, "flee_nlos": 4}, "D2": {"crate_range": 150, "loot_c_range": 110}, "E2": VERSION_PARAMS["B6"], "G2": {"zone_lead": 60}, "G3": {"zone_lead": 60}, "F1": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "F2": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.35, "bz_back": 0.6}, "F3": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "X20": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X21": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X22": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X23": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.3, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X24": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.4}, "X25": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.75, "heal_lo_late": 0.65}, "X26": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X27": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X10": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X11": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X12": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X13": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X14": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X15": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X16": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X17": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X18": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X19": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
+DEFAULT_VERSION = "G1"
 
 
 def load_params(version=None):
@@ -620,6 +623,14 @@ class Bot:
                 elif target["d"] < want_lo:
                     radial = -P["radial"]
                 move = (px + bx * radial, py + by * radial)
+                if "fightcover" in self.flags and target["d"] > 40:
+                    spot = self.firing_spot(me, target, mechs, want_lo, want_hi, t)
+                    if spot is not None:
+                        if d2(spot, (x, y)) > 3:
+                            move, _ = self.nav_to(me, spot[0], spot[1])
+                        else:
+                            move = (px * 0.35, py * 0.35)   # hold the spot with a small sidestep
+                        tag += "#"
                 boost = me["energy"] > P["fight_boost_e"] and target["d"] < P["fight_boost_d"]
                 if bold:
                     boost = me["energy"] > 25
@@ -756,6 +767,39 @@ class Bot:
         if self.plan == "build":
             extra = {"ambush", "creep"} | (set() if "switch" in self.base_flags else {"buildloot"})
         self.flags = self.base_flags | extra
+
+    def firing_spot(self, me, target, mechs, lo, hi, t):
+        """G2: a nearby spot (<= 36 m) that sees the target at our preferred range, is seen by as few other enemies as
+        possible and sits near tall buildings (GT Goats-style hold-and-shoot). Cached for 1 s."""
+        x, y = me["pos"][0], me["pos"][1]
+        c = getattr(self, "_fs_cache", None)
+        if c and c[0] == target["id"] and t - c[1] < 1.0 and d2(c[2], (x, y)) < 6:
+            return c[3]
+        g = self.geo
+        tz = target["pos"][2] + 4.5
+        others = [m for m in mechs if m is not target and m["d"] < 200][:3]
+        mid = 0.5 * (lo + hi)
+        best = None
+        for r in (0.0, 12.0, 24.0, 36.0):
+            for k in range(1 if r == 0 else 12):
+                a = k * TAU / 12
+                cx, cy = x + math.cos(a) * r, y + math.sin(a) * r
+                if r and (not g.is_free(cx, cy) or not g.walk_line(x, y, cx, cy)):
+                    continue
+                dt_ = math.hypot(target["pos"][0] - cx, target["pos"][1] - cy)
+                if dt_ < lo * 0.7 or dt_ > hi * 1.15:
+                    continue
+                gz = g.ground(cx, cy)
+                if not g.los((cx, cy, gz + 7), (target["pos"][0], target["pos"][1], tz)):
+                    continue
+                seen = sum(1 for m in others if g.los((m["pos"][0], m["pos"][1], m["pos"][2] + 8), (cx, cy, gz + 4.5)))
+                j, i = g.cell(cx, cy)
+                sc = seen * 40 + abs(dt_ - mid) * 0.3 + r * 0.4 - float(g.cover[j, i]) * 25
+                if best is None or sc < best[0]:
+                    best = (sc, (cx, cy))
+        spot = best[1] if best else None
+        self._fs_cache = (target["id"], t, (x, y), spot)
+        return spot
 
     def farm_shot(self, me, obs, npcs):
         """D2: nearest crate (120 m) or drone (110 m) in line of fire, as a target while moving on to something else."""
