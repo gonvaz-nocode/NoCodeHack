@@ -80,6 +80,7 @@ VERSIONS = {
     "C8": "gunwise,dodge",      # sidestep charging lasers aimed at us and incoming mortar shells
     "C9": "gunwise,heal",       # C5 + C6: heal between fights, and one fight at a time
     "D1": "gunwise",            # A9, fight harder: retreat only when nearly dead or swarmed
+    "D2": "gunwise,econ",       # A9 + economy loop: farm wider, opportunistic shots at crates and drones
 }
 # Per-version setting overrides, applied on top of PARAMS (SURVIVOR_PARAMS still overrides both).
 VERSION_PARAMS = {
@@ -96,8 +97,8 @@ VERSION_PARAMS = {
     "B7": {"end_flee_hp1": 0.5, "end_flee_hp2": 0.7},
 }
 VERSION_PARAMS.update({"C1": VERSION_PARAMS["B4"], "C2": VERSION_PARAMS["B5"], "C3": VERSION_PARAMS["B6"], "C4": VERSION_PARAMS["B7"],
-                       "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "D1": {"flee_hp1": 0.2, "flee_hp2": 0.3, "flee_natt": 3, "flee_nlos": 4}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
-DEFAULT_VERSION = "D1"
+                       "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "D1": {"flee_hp1": 0.2, "flee_hp2": 0.3, "flee_natt": 3, "flee_nlos": 4}, "D2": {"crate_range": 150, "loot_c_range": 110}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
+DEFAULT_VERSION = "D2"
 
 
 def load_params(version=None):
@@ -615,6 +616,8 @@ class Bot:
                     crept = True
             if mode in ("npc", "crate") and self.loot_target is not None:
                 shoot_target = self.loot_target
+            if "econ" in self.flags and shoot_target is None and not mechs:
+                shoot_target = self.farm_shot(me, obs, npcs)   # D2: shoot loot while doing anything else
 
         if t < self.unstick_until and self.unstick_dir:
             move = self.unstick_dir
@@ -695,6 +698,19 @@ class Bot:
         if self.plan == "build":
             extra = {"ambush", "creep"} | (set() if "switch" in self.base_flags else {"buildloot"})
         self.flags = self.base_flags | extra
+
+    def farm_shot(self, me, obs, npcs):
+        """D2: nearest crate (120 m) or drone (110 m) in line of fire, as a target while moving on to something else."""
+        mz = self.muzzle(me)
+        best = None
+        for c in obs.get("crates", []):
+            d = math.dist(c["pos"], me["pos"])
+            if d < 120 and (best is None or d < best[0]) and self.geo.los(mz, (c["pos"][0], c["pos"][1], c["pos"][2] + 1.2)):
+                best = (d, {"pos": c["pos"], "vel": [0, 0, 0], "kind": "crate", "d": d, "hp": c["hp"], "id": c["id"], "los": True})
+        for n in npcs:
+            if n["d"] < 110 and n["los"] and me["hp"] > 0.6 * me["max_hp"] and (best is None or n["d"] < best[0]):
+                best = (n["d"], n)
+        return best[1] if best else None
 
     def dodge_vec(self, me, mechs, obs):
         """C8: a sidestep away from a charging laser lined up on us, or from where a mortar shell will land."""
@@ -824,7 +840,7 @@ class Bot:
             return best[1], best[2], best[3]
         # NPC drones: farm cubes when healthy
         if hp_frac > 0.7:
-            cands = [n for n in npcs if n["d"] < 90 and n["los"] and inzone(n["pos"], 5)]
+            cands = [n for n in npcs if n["d"] < (140 if "econ" in self.flags else 90) and n["los"] and inzone(n["pos"], 5)]
             if cands:
                 n = min(cands, key=lambda n: n["d"] + n["hp"] * 0.1)
                 self.loot_target = n
