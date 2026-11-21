@@ -42,6 +42,8 @@ PARAMS = {
     # B2/B3 "phased": hide + loot ("build") then hunt. Practice: hunt from ph_prac_t s, or once we hold a second real
     # weapon and ph_prac_cubes cubes. Free-for-all: hunt once ph_ffa_alive or fewer mechs remain, or in the late stage.
     "ph_prac_t": 45.0, "ph_prac_cubes": 2.0, "ph_ffa_alive": 6.0, "ph_loot_w": 1.3,
+    # C5 "heal": start healing under heal_lo, stop at heal_hi; don't start fights under heal_start
+    "heal_lo": 0.5, "heal_hi": 0.9, "heal_start": 0.7,
 }
 
 # Named versions -> behaviour switches. A1 is the original v1 (git commit f2c923f), not reproducible by switches.
@@ -71,6 +73,11 @@ VERSIONS = {
     "C2": "phased,switch,gunwise,timed",           # B9 + less careful gun (B5's settings)
     "C3": "phased,switch,gunwise,timed",           # B9 + Z100 tuner's settings (B6's)
     "C4": "phased,switch,gunwise,timed,endgame",   # B9 + end-game survival push (B7's)
+    # practice-score experiments on A9 (the best real base): one change each
+    "C5": "gunwise,heal",       # heal between fights: hide until 90% HP after dropping under 50%; no new fights under 70%
+    "C6": "gunwise",            # one fight at a time: break line of sight once two enemies can see us
+    "C7": "gunwise",            # laser kiting: hold 120-150 m with a laser
+    "C8": "gunwise,dodge",      # sidestep charging lasers aimed at us and incoming mortar shells
 }
 # Per-version setting overrides, applied on top of PARAMS (SURVIVOR_PARAMS still overrides both).
 VERSION_PARAMS = {
@@ -86,8 +93,9 @@ VERSION_PARAMS = {
     # B7: from the mid stage on, keep HP: flee earlier, don't chase; supply-drop and cube reach in loot_goal
     "B7": {"end_flee_hp1": 0.5, "end_flee_hp2": 0.7},
 }
-VERSION_PARAMS.update({"C1": VERSION_PARAMS["B4"], "C2": VERSION_PARAMS["B5"], "C3": VERSION_PARAMS["B6"], "C4": VERSION_PARAMS["B7"]})
-DEFAULT_VERSION = "C4"
+VERSION_PARAMS.update({"C1": VERSION_PARAMS["B4"], "C2": VERSION_PARAMS["B5"], "C3": VERSION_PARAMS["B6"], "C4": VERSION_PARAMS["B7"],
+                       "C6": {"flee_nlos": 2}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
+DEFAULT_VERSION = "C5"
 
 
 def load_params(version=None):
@@ -158,6 +166,7 @@ class Bot:
         self.phase = "center" if "center" in self.flags else "normal"   # B1 opening: center -> transit -> normal
         self.center_spot = None
         self.stage = "early"
+        self.healing = False
         # B2/B3: is this a free-for-all? Practice house bots never kill each other, so any death we didn't cause
         # (zone deaths aside) means other mechs are fighting each other.
         self.base_flags = set(self.flags)
@@ -462,6 +471,12 @@ class Bot:
         recent_att = [k for k, tt in self.attackers.items() if t - tt < 3]
         close_enemies = [m for m in mechs if m["d"] < 120]
 
+        if "heal" in self.flags:
+            if hp_frac < P["heal_lo"]:
+                self.healing = True
+            elif hp_frac >= P["heal_hi"]:
+                self.healing = False
+
         # ---- choose movement
         crept = False
         tag = ""
@@ -514,6 +529,12 @@ class Bot:
                 # B7: from mid-game, bank HP for the last circles: break off sooner
                 if hp_frac < P["end_flee_hp1"] or (hp_frac < P["end_flee_hp2"] and target["hp"] > me["hp"]):
                     losing = True
+            if "heal" in self.flags:
+                engaged = target["id"] in self.attackers and t - self.attackers[target["id"]] < 3
+                if self.healing and not (target["d"] < 30 and engaged):
+                    losing = True   # C5: break line of sight and regenerate instead of trading while hurt
+                elif hp_frac < P["heal_start"] and not engaged and target["d"] > 45:
+                    losing = True   # C5: don't open a new fight below heal_start
             tag = "!" if bold else ("?" if shy else "")
             if losing:
                 self.flee_until = t + P["flee_hold"]
@@ -552,6 +573,8 @@ class Bot:
             goal = None
             if need_zone:
                 goal = self.hide; mode = "zone"
+            elif "heal" in self.flags and self.healing:
+                goal = self.hide; mode = "heal"
             else:
                 goal = self.loot_goal(me, obs, npcs, kinds, t, cur_c, cur_r)
                 if goal is None:
@@ -572,7 +595,7 @@ class Bot:
                 move = mv
                 if mode == "avoid" and rem < 2:
                     move = (0.0, 0.0)
-                if mode == "hide" and rem < 4:
+                if mode in ("hide", "heal") and rem < 4:
                     move = (0.0, 0.0)
                 if mode == "zone" and not in_zone:
                     boost = me["energy"] > 10
@@ -596,6 +619,11 @@ class Bot:
             if self.stuck_ticks == 0 and me["grounded"]:
                 act["jump"] = True
             boost = me["energy"] > 20
+
+        if "dodge" in self.flags:
+            dv = self.dodge_vec(me, mechs, obs)
+            if dv is not None:
+                move = dv; boost = me["energy"] > 15; tag += "^"
 
         # wall-avoid
         mag = math.hypot(*move)
@@ -665,6 +693,41 @@ class Bot:
         if self.plan == "build":
             extra = {"ambush", "creep"} | (set() if "switch" in self.base_flags else {"buildloot"})
         self.flags = self.base_flags | extra
+
+    def dodge_vec(self, me, mechs, obs):
+        """C8: a sidestep away from a charging laser lined up on us, or from where a mortar shell will land."""
+        x, y, z = me["pos"]
+        for m in mechs:   # charging lasers: the beam fires along their aim when released
+            if not m.get("charging") or not m["los"] or m["d"] > 285 or m["d"] < 8:
+                continue
+            dx, dy = math.cos(m["aim"][0]), math.sin(m["aim"][0])
+            rx, ry = x - m["pos"][0], y - m["pos"][1]
+            if rx * dx + ry * dy <= 0:
+                continue
+            side = -rx * dy + ry * dx   # signed distance from the beam line
+            if abs(side) < 2.5 * (1 + 0.05 * me.get("cubes", 0)) + 2.0:
+                sgn = 1.0 if side >= 0 else -1.0
+                return (-dy * sgn, dx * sgn)
+        g = self.wcfg["mortar"].get("gravity", 22)
+        splash = self.wcfg["mortar"].get("splash_radius", 7)
+        for p in obs.get("projectiles", []):
+            if p.get("kind") != "mortar":
+                continue
+            (px, py, pz), (vx, vy, vz) = p["pos"], p["vel"]
+            a, b, c = -0.5 * g, vz, pz - (z + 1.0)
+            disc = b * b - 4 * a * c
+            if disc < 0:
+                continue
+            tl = (-b - math.sqrt(disc)) / (2 * a)   # later root: when it comes down to our height
+            if tl <= 0 or tl > 6:
+                continue
+            lx, ly = px + vx * tl, py + vy * tl
+            d = math.hypot(x - lx, y - ly)
+            if d < splash + 4:
+                if d < 0.5:
+                    return (-vy / max(math.hypot(vx, vy), 1e-3), vx / max(math.hypot(vx, vy), 1e-3))
+                return ((x - lx) / d, (y - ly) / d)
+        return None
 
     def opening(self, me, t, in_zone, dcur, cur_r, dnext, nr, margin, goal, mode):
         """B1: first walk to a half-sheltered spot near the map centre, then to the zone through cover, then normal play."""
