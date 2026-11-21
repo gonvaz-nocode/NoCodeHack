@@ -64,6 +64,7 @@ VERSIONS = {
     "B5": "phased,switch,gunwise",           # less careful gun than A9 (between A9 and the original)
     "B6": "phased,switch,gunwise",           # Z100 tuner's best settings (sim-tuned, 3 generations)
     "B7": "phased,switch,gunwise,endgame",   # end-game survival push: drops, cubes, keep HP for the last circles
+    "B8": "phased,switch,gunwise",           # B3 corrected: practice play identical to A9; free-for-all needs 2 deaths
 }
 # Per-version setting overrides, applied on top of PARAMS (SURVIVOR_PARAMS still overrides both).
 VERSION_PARAMS = {
@@ -79,7 +80,7 @@ VERSION_PARAMS = {
     # B7: from the mid stage on, keep HP: flee earlier, don't chase; supply-drop and cube reach in loot_goal
     "B7": {"end_flee_hp1": 0.5, "end_flee_hp2": 0.7},
 }
-DEFAULT_VERSION = "B7"
+DEFAULT_VERSION = "B8"
 
 
 def load_params(version=None):
@@ -632,7 +633,9 @@ class Bot:
         others_died = (total - alive) - self.my_kills
         # practice house bots never kill each other: deaths we didn't cause, before the zone could have done it, mean
         # other mechs are fighting each other (free-for-all). Later, require two to allow for zone deaths.
-        if not self.ffa and others_died >= (1 if t < 100 else 2):
+        # Two unexplained deaths, not one: on the real server a house bot can also die to an NPC drone or its own mortar,
+        # and kill events in skipped observations are lost. Real free-for-alls lose mechs fast, so two comes quickly.
+        if not self.ffa and others_died >= (2 if t < 200 else 3):
             self.ffa = True
         if "switch" in self.base_flags:
             self.plan = "build" if self.ffa else "hunt"          # B3: A8-style hiding for the rest of a free-for-all
@@ -800,7 +803,7 @@ class Bot:
         """A nearby walkable spot with no line of sight from any of the enemies."""
         g = self.geo
         x, y, z = me["pos"]
-        if not (self.base_flags & {"phased", "ambush"}):   # submitted versions keep their exact behaviour
+        if "ambush" not in self.flags:   # only while hiding (A8, B2/B3 build); in hunt mode play exactly like A9
             return self._cover_search(me, enemies)
         enemies = sorted(enemies, key=lambda m: m.get("d", 0))[:3]
         ck = tuple(sorted(m.get("id", -1) for m in enemies))
