@@ -79,7 +79,7 @@ VERSION_PARAMS = {
     # B7: from the mid stage on, keep HP: flee earlier, don't chase; supply-drop and cube reach in loot_goal
     "B7": {"end_flee_hp1": 0.5, "end_flee_hp2": 0.7},
 }
-DEFAULT_VERSION = "B6"
+DEFAULT_VERSION = "B7"
 
 
 def load_params(version=None):
