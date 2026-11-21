@@ -46,6 +46,8 @@ PARAMS = {
     "heal_lo": 0.5, "heal_hi": 0.9, "heal_start": 0.7,
     # F1 "berserk": retreat (out of sight, behind cover) only under bz_flee HP; go back in at bz_back
     "bz_flee": 0.25, "bz_back": 0.5,
+    # G4 hold-spot range factor (hold for targets within want_hi * hold_range); H1 roof escape threshold
+    "hold_range": 1.1, "roofesc_hp": 0.35,
     # X10 profile: easy kills (hp under easy_hp, within easy_d, back turned, or shooting us); harvest until a second
     # weapon and harvest_cubes cubes; heal threshold rises to heal_lo_late once the zone is small
     "easy_hp": 0.4, "easy_d": 45.0, "harvest_cubes": 2.0, "heal_lo_late": 0.5,
@@ -95,6 +97,14 @@ VERSIONS = {
     "G4": "gunwise,dodge,holdspot",           # C8 + fight from the pre-chosen covered spot when the target is in range
     "G5": "gunwise,dodge,adapt",              # C8 + learn press vs space during the match (damage out - in)
     "G6": "gunwise,dodge,holdspot,adapt",     # G4 + G5
+    "I1": "gunwise,dodge,holdspot,repair",                 # G4 + heal quietly between fights, finish weak targets
+    "I2": "gunwise,dodge,holdspot,memory",                 # G4 + remember and farm loot / cubes / drones / crates
+    "I3": "gunwise,dodge,holdspot,repair,memory",          # I1 + I2
+    "I4": "gunwise,dodge,holdspot,repair,memory,roofesc",  # I3 + roof escape
+    "H1": "gunwise,dodge,holdspot,roofesc",    # G4 + jet onto a low roof to escape when hurt
+    "H2": "gunwise,dodge,holdspot",            # G4 + head for the next circle 60 s early
+    "H3": "gunwise,dodge,holdspot,roofloot",   # G4 + climb for nearby roof loot when safe
+    "H4": "gunwise,dodge,holdspot",            # G4, hold the spot for targets up to 40% beyond our range
     "G7": "gunwise,dodge,laserfirst,holdspot",  # G1 (best real 3.92) + G4: laser first, fight from the pre-chosen spot
     "F3": "gunwise,dodge,berserk,laserfirst",  # F1 + grab a laser/lightning in sight before chasing mechs not shooting us
     "D1": "gunwise",            # A9, fight harder: retreat only when nearly dead or swarmed
@@ -133,8 +143,8 @@ VERSION_PARAMS = {
     "B7": {"end_flee_hp1": 0.5, "end_flee_hp2": 0.7},
 }
 VERSION_PARAMS.update({"C1": VERSION_PARAMS["B4"], "C2": VERSION_PARAMS["B5"], "C3": VERSION_PARAMS["B6"], "C4": VERSION_PARAMS["B7"],
-                       "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "D1": {"flee_hp1": 0.2, "flee_hp2": 0.3, "flee_natt": 3, "flee_nlos": 4}, "D2": {"crate_range": 150, "loot_c_range": 110}, "E2": VERSION_PARAMS["B6"], "G2": {"zone_lead": 60}, "G3": {"zone_lead": 60}, "F1": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "F2": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.35, "bz_back": 0.6}, "F3": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "X20": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X21": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X22": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X23": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.3, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X24": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.4}, "X25": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.75, "heal_lo_late": 0.65}, "X26": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X27": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X10": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X11": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X12": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X13": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X14": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X15": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X16": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X17": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X18": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X19": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
-DEFAULT_VERSION = "G7"
+                       "C6": {"flee_nlos": 2}, "C9": {"flee_nlos": 2}, "D1": {"flee_hp1": 0.2, "flee_hp2": 0.3, "flee_natt": 3, "flee_nlos": 4}, "D2": {"crate_range": 150, "loot_c_range": 110}, "E2": VERSION_PARAMS["B6"], "G2": {"zone_lead": 60}, "H2": {"zone_lead": 60}, "H4": {"hold_range": 1.4}, "G3": {"zone_lead": 60}, "F1": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "F2": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.35, "bz_back": 0.6}, "F3": {"radial": 1.0, "fight_boost_e": 30, "fight_boost_d": 250, "bz_flee": 0.25, "bz_back": 0.5}, "X20": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X21": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X22": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X23": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.3, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X24": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.4}, "X25": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.75, "heal_lo_late": 0.65}, "X26": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X27": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X10": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X11": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X12": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X13": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X14": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X15": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X16": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X17": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X18": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "X19": {"crate_range": 150, "loot_c_range": 110, "heal_lo": 0.4, "heal_hi": 0.9, "heal_lo_late": 0.65}, "C7": {"rng_laser_lo": 120, "rng_laser_hi": 150}})
+DEFAULT_VERSION = "I1"
 
 
 def load_params(version=None):
@@ -207,6 +217,10 @@ class Bot:
         self.stage = "early"
         self.healing = False
         self.bz_retreat = False
+        self.climb = None   # (x, y, z, until, why)
+        self.repair_until = -99.0
+        self.last_threat = None   # (x, y, z, t)
+        self.mem = {}   # id -> [kind, pos, t_seen]  (weapons, cubes, npcs, crates)
         self.dmg_out = 0.0; self.dmg_in = 0.0          # G5: running damage totals vs mechs
         self.arm_stats = {"press": [1.0, 0.3], "space": [1.0, 0.0]}   # [pseudo-count, reward sum]: lean to press
         self.eng = None
@@ -380,6 +394,7 @@ class Bot:
                     self.attackers[e["by"]] = t
             elif e["type"] == "kill":
                 self.my_kills += 1
+                self.repair_until = max(self.repair_until, t + 8)
             elif e["type"] == "take_failed":
                 self.blacklist[e["id"]] = t + 20
         for s in obs.get("sounds", []):
@@ -456,6 +471,10 @@ class Bot:
             m["back"] = m["off"] > arc + 0.15
             m["faces"] = m["off"] < math.radians(self.vis.get("fov_deg", 120)) / 2
         self.stage = "early" if cur_r > P["stage_mid_r"] else ("late" if cur_r < P["stage_late_r"] else "mid")
+        if mechs:
+            nm = min(mechs, key=lambda m: m["d"]); self.last_threat = (nm["pos"][0], nm["pos"][1], nm["pos"][2], t)
+        if "memory" in self.flags:
+            self.remember(obs, npcs, x, y, t)
 
         def threat_score(m):
             s = m["d"] + m["hp"] * P["ts_hp"]
@@ -608,6 +627,16 @@ class Bot:
                 # B7: from mid-game, bank HP for the last circles: break off sooner
                 if hp_frac < P["end_flee_hp1"] or (hp_frac < P["end_flee_hp2"] and target["hp"] > me["hp"]):
                     losing = True
+            if "repair" in self.flags:
+                tf = target["hp"] / max(1.0, target.get("max_hp", 1400))
+                threats = len([m for m in mechs if m["los"] and m["d"] < 160])
+                finishing = tf < 0.2 and hp_frac > 0.2 and threats <= 2
+                losing = (not finishing) and ((hp_frac < 0.35 and tf > hp_frac + 0.1) or (threats >= 2 and hp_frac < 0.55)
+                                              or (threats >= 3 and hp_frac < 0.8))
+                if losing:
+                    self.repair_until = max(self.repair_until, t + 6)
+                else:
+                    self.flee_until = 0.0
             if "berserk" in self.flags:
                 if hp_frac < P["bz_flee"]:
                     self.bz_retreat = True
@@ -654,7 +683,7 @@ class Bot:
                     radial = -P["radial"] if target["d"] < 0.8 * want_hi else 0.0
                     tag += "s"
                 if "holdspot" in self.flags and self.hide and d2((x, y), self.hide) < 8 and target["los"] \
-                        and target["d"] <= want_hi * 1.1:
+                        and target["d"] <= want_hi * P["hold_range"]:
                     radial = 0.0; px, py = px * 0.4, py * 0.4   # at our covered spot with a shot: stay and fight from here
                     tag += "h"
                 move = (px + bx * radial, py + by * radial)
@@ -678,6 +707,14 @@ class Bot:
             goal = None
             if need_zone:
                 goal = self.hide; mode = "zone"
+            elif "repair" in self.flags and (hp_frac < 0.55 or (t < self.repair_until and hp_frac < 0.9)):
+                goal = (x, y); mode = "repair"
+                lt = self.last_threat
+                if lt and t - lt[3] < 20 and self.geo.los((lt[0], lt[1], lt[2] + 8), (x, y, z + 6)):
+                    spot = self.cover_from(me, [{"pos": [lt[0], lt[1], lt[2]], "d": d2(lt, (x, y)), "id": -7}])
+                    if spot:
+                        goal = spot
+                goal = (goal[0], goal[1], "repair")
             elif ("heal" in self.flags and self.healing) or ("berserk" in self.flags and self.bz_retreat):
                 goal = self.hide; mode = "heal"
             elif getattr(self, "want_special", None) is not None:
@@ -702,6 +739,10 @@ class Bot:
                 move = mv
                 if mode == "avoid" and rem < 2:
                     move = (0.0, 0.0)
+                if mode == "repair":
+                    k = 4.6 / max(me["stats"].get("walk_speed", 11.7), 1)   # silent
+                    move = (move[0] * k, move[1] * k) if rem >= 2 else (0.0, 0.0)
+                    boost = False
                 if mode in ("hide", "heal") and rem < 4:
                     move = (0.0, 0.0)
                 if mode == "zone" and not in_zone:
@@ -723,6 +764,16 @@ class Bot:
             if "econ" in self.flags and shoot_target is None and not mechs:
                 shoot_target = self.farm_shot(me, obs, npcs)   # D2: shoot loot while doing anything else
 
+        if self.flags & {"roofesc", "roofloot"}:
+            self.plan_climb(me, obs, mechs, hp_frac, t, need_zone)
+            if self.climb is not None:
+                mv_c, jump_c, boost_c = self.climb_step(me, t)
+                if mv_c is not None:
+                    act["move"] = [round(mv_c[0], 3), round(mv_c[1], 3)]
+                    act["jump"] = jump_c
+                    act["boost"] = boost_c
+                    self.last_move_mag = 0.0   # no stuck trips while climbing
+                    self.climbing = True
         if t < self.unstick_until and self.unstick_dir:
             move = self.unstick_dir
             if self.stuck_ticks == 0 and me["grounded"]:
@@ -739,9 +790,12 @@ class Bot:
         if mag > 0.05:
             ux, uy = self.safe_dir(x, y, move[0] / mag, move[1] / mag)
             move = (ux * min(mag, 1.0), uy * min(mag, 1.0))
-        self.last_move_mag = math.hypot(*move)
-        act["move"] = [round(move[0], 3), round(move[1], 3)]
-        act["boost"] = bool(boost)
+        if getattr(self, "climbing", False):
+            self.climbing = False
+        else:
+            self.last_move_mag = math.hypot(*move)
+            act["move"] = [round(move[0], 3), round(move[1], 3)]
+            act["boost"] = bool(boost)
 
         # ---- pickups (take when in range)
         self.try_take(me, obs, kinds, act, t)
@@ -835,6 +889,85 @@ class Bot:
         spot = best[1] if best else None
         self._fs_cache = (target["id"], t, (x, y), spot)
         return spot
+
+    def remember(self, obs, npcs, x, y, t):
+        """I2: remember weapon pickups, cubes, drones (and forget what is gone or stale)."""
+        seen = set()
+        for p in obs.get("pickups", []):
+            self.mem[p["id"]] = [p["kind"], p["pos"], t]; seen.add(p["id"])
+        for c in obs.get("cubes", []):
+            self.mem[c["id"]] = ["cube", c["pos"], t]; seen.add(c["id"])
+        for n in npcs:
+            self.mem[n["id"]] = ["npc", n["pos"], t]; seen.add(n["id"])
+        for mid in list(self.mem):
+            kind, pos, ts = self.mem[mid]
+            near = d2(pos, (x, y)) < 25 and mid not in seen   # we are there and it is gone
+            if near or t - ts > (25 if kind == "npc" else 90):
+                del self.mem[mid]
+
+    def plan_climb(self, me, obs, mechs, hp_frac, t, need_zone):
+        """H1/H3: start, keep or drop a climb goal."""
+        g = self.geo
+        x, y, z = me["pos"]
+        if self.climb is not None:
+            gx, gy, gz, until, why = self.climb
+            done = me["grounded"] and abs(z - gz) < 1.0 and d2((x, y), (gx, gy)) < 6
+            if t > until or (done and why == "loot") or (why == "escape" and done and hp_frac > 0.6):
+                self.climb = None
+            return
+        if need_zone or not me["grounded"]:
+            return
+        ground = g.ground(x, y)
+        if z > ground + 3:   # already up somewhere
+            return
+        if "roofesc" in self.flags and hp_frac < self.P["roofesc_hp"] and me["energy"] > 40:
+            threats = [m for m in mechs if m["los"] and m["d"] < 120]
+            if threats:
+                tx = sum(m["pos"][0] for m in threats) / len(threats); ty = sum(m["pos"][1] for m in threats) / len(threats)
+                best = None
+                for r in (10.0, 16.0, 22.0):
+                    for k in range(12):
+                        a = k * TAU / 12
+                        cx, cy = x + math.cos(a) * r, y + math.sin(a) * r
+                        i = int(round(cx - g.x0)); j = int(round(cy - g.y0))
+                        if not (0 <= i < g.nx and 0 <= j < g.ny):
+                            continue
+                        top = float(g.top[j, i]); h = top - float(g.terr[j, i])
+                        if not (6 <= h <= 20) or top - z > 22:
+                            continue
+                        # enough roof around it to stand on
+                        if min(float(g.top[min(max(j + dj, 0), g.ny - 1), min(max(i + di, 0), g.nx - 1)])
+                               for dj in (-3, 0, 3) for di in (-3, 0, 3)) < top - 1.0:
+                            continue
+                        away = (cx - x) * (x - tx) + (cy - y) * (y - ty)
+                        sc = r - 0.02 * away
+                        if best is None or sc < best[0]:
+                            best = (sc, (cx, cy, top))
+                if best:
+                    self.climb = (*best[1], t + 6.0, "escape")
+                    return
+        if "roofloot" in self.flags and me["energy"] > 50 and not any(m["los"] for m in mechs):
+            kinds = [w["kind"] if w else None for w in me["weapons"]]
+            items = [(p["pos"], "w") for p in obs.get("pickups", []) if p["kind"] in ("laser", "lightning") and p["kind"] not in kinds]
+            items += [(c["pos"], "c") for c in obs.get("cubes", [])]
+            for pos, _ in sorted(items, key=lambda it: d2(it[0], (x, y))):
+                up = pos[2] - z
+                if d2(pos, (x, y)) < 15 and 2.5 < up <= 25:
+                    self.climb = (pos[0], pos[1], pos[2], t + 5.0, "loot")
+                    return
+
+    def climb_step(self, me, t):
+        """Move toward the climb goal; jump at the wall and jet until clear of the edge, then glide on."""
+        x, y, z = me["pos"]
+        gx, gy, gz, until, why = self.climb
+        d = d2((x, y), (gx, gy))
+        if d < 0.8:
+            return (0.0, 0.0), False, False
+        mv = ((gx - x) / d, (gy - y) / d)
+        near = d < 14
+        jump = bool(near and me["grounded"] and z < gz - 1.0)
+        boost = bool(near and not me["grounded"] and z < gz + 2.5 and me["energy"] > 3)
+        return mv, jump, boost
 
     def farm_shot(self, me, obs, npcs):
         """D2: nearest crate (120 m) or drone (110 m) in line of fire, as a target while moving on to something else."""
@@ -986,14 +1119,36 @@ class Bot:
         for dr in obs.get("drops", []):
             d = d2(dr["pos"], (x, y))
             eg = "endgame" in self.flags   # B7: a drop is full HP + energy + 3 cubes: go further, even when hurt
-            if d < (260 if eg else 160) and dr["lands_in"] < d / 11 + 3 and hp_frac > (0.15 if eg else 0.3):
+            rp = "repair" in self.flags
+            if d < (260 if (eg or rp) else 160) and dr["lands_in"] < d / 11 + 3 and hp_frac > (0.15 if (eg or rp) else 0.3):
                 if dr.get("holder") not in (None, me["id"]) and dr.get("progress", 0) > 2:
                     continue
-                sc = d - (140 if eg else 40)
+                sc = d - (140 if (eg or ("repair" in self.flags and hp_frac < 0.8)) else 40)
                 if best is None or sc < best[0]:
                     best = (sc, dr["pos"][0], dr["pos"][1], "drop")
+        if "memory" in self.flags:
+            for mid, (kind, pos, ts) in self.mem.items():
+                if self.blacklist.get(mid, 0) > t or not inzone(pos):
+                    continue
+                d = d2(pos, (x, y))
+                if kind == "cube" and d < 150 and reachable(pos):
+                    sc = d - 30
+                elif kind in ("laser", "lightning", "mortar") and kind not in have and d < 160 and reachable(pos) \
+                        and (kinds[1] is None or self.rank.get(kind, -1) > worst):
+                    sc = d - self.rank.get(kind, 0) * 20 - (50 if kinds[1] is None else 0)
+                else:
+                    continue
+                if best is None or sc < best[0]:
+                    best = (sc, pos[0], pos[1], "weapon" if kind != "cube" else "cube")
         if best is not None:
             return best[1], best[2], best[3]
+        if "memory" in self.flags and hp_frac > 0.5:
+            # farm remembered drones: walk into gun range (~38 m) of the nearest one
+            dr = [(d2(pos, (x, y)), pos) for mid, (kind, pos, ts) in self.mem.items() if kind == "npc" and d2(pos, (x, y)) < 170]
+            if dr and not any(n["los"] and n["d"] < 90 for n in npcs):
+                dd, pos = min(dr, key=lambda q: q[0])
+                if dd > 38:
+                    return pos[0], pos[1], "npc"
         # NPC drones: farm cubes when healthy
         if hp_frac > 0.7:
             cands = [n for n in npcs if n["d"] < (140 if "econ" in self.flags else 90) and n["los"] and inzone(n["pos"], 5)]
