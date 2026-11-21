@@ -59,12 +59,34 @@ VERSIONS = {
     "B2": "phased,gunwise",       # A9 guns; hide + loot to grow while others thin out, then turn aggressive (when depends
                                   # on whether this is practice or a free-for-all, detected from who is killing whom)
     "B3": "phased,switch,gunwise",  # A9 guns; aggressive in practice, A8-style hiding for the rest of a free-for-all
+    # experiments on top of B3 (their settings are in VERSION_PARAMS)
+    "B4": "phased,switch,gunwise",           # more careful gun than A9
+    "B5": "phased,switch,gunwise",           # less careful gun than A9 (between A9 and the original)
+    "B6": "phased,switch,gunwise",           # Z100 tuner's best settings (sim-tuned, 3 generations)
+    "B7": "phased,switch,gunwise,endgame",   # end-game survival push: drops, cubes, keep HP for the last circles
 }
-DEFAULT_VERSION = "B3"
+# Per-version setting overrides, applied on top of PARAMS (SURVIVOR_PARAMS still overrides both).
+VERSION_PARAMS = {
+    "B4": {"gun_maxd_early": 80, "gun_maxd_mid": 130, "gun_maxd_late": 180,
+           "gun_phit_early": 0.55, "gun_phit_mid": 0.40, "gun_phit_late": 0.25},
+    "B5": {"gun_maxd_early": 150, "gun_maxd_mid": 210, "gun_maxd_late": 230,
+           "gun_phit_early": 0.30, "gun_phit_mid": 0.18, "gun_phit_late": 0.05},
+    "B6": {"rng_light_lo": 8.486, "rng_light_hi": 18.548, "rng_gun_hi": 173.441, "flee_hp2": 0.8, "flee_ratio2": 1.216,
+           "flee_nlos": 4.0, "flee_hold": 1.949, "flee_boost_e": 31.297, "strafe_min": 0.43, "ts_hp": 0.009,
+           "zone_edge": 9.065, "zone_margin": 33.745, "zone_margin_frac": 0.47, "hide_cover": 24.823,
+           "hide_center": 4.326, "loot_w_range": 106.216, "loot_w_rank": 18.538, "loot_c_bonus": 4.605,
+           "rank_laser": 3.006, "rank_mortar": 0.346},
+    # B7: from the mid stage on, keep HP: flee earlier, don't chase; supply-drop and cube reach in loot_goal
+    "B7": {"end_flee_hp1": 0.5, "end_flee_hp2": 0.7},
+}
+DEFAULT_VERSION = "B4"
 
 
-def load_params():
+def load_params(version=None):
     p = dict(PARAMS)
+    p.update({"end_flee_hp1": 0.5, "end_flee_hp2": 0.7})
+    for k, v in VERSION_PARAMS.get(version, {}).items():
+        p[k] = float(v)
     raw = os.environ.get("SURVIVOR_PARAMS")
     if raw:
         try:
@@ -116,14 +138,14 @@ class Bot:
         #   creep = walk below the footstep threshold when an enemy was near recently and the zone allows it
         # Sim A/B (120 practice + 15 ffa seeds): pick -0.9 pts/match (significant), cover and creep -0.2..-0.3 (noise;
         # the sim has no canopy or sound, so it can only show their costs). See the review notes before turning any on.
-        self.P = load_params()
-        self.rank = {"laser": self.P["rank_laser"], "lightning": self.P["rank_light"], "mortar": self.P["rank_mortar"], "gun": 0.0}
         fl = os.environ.get("SURVIVOR_FLAGS")
         if fl is None:
             self.version = os.environ.get("SURVIVOR_VERSION", DEFAULT_VERSION)
             fl = VERSIONS.get(self.version, "")
         else:
             self.version = "custom"
+        self.P = load_params(self.version)
+        self.rank = {"laser": self.P["rank_laser"], "lightning": self.P["rank_light"], "mortar": self.P["rank_mortar"], "gun": 0.0}
         self.flags = set(f.strip() for f in fl.split(",") if f.strip())
         self.phase = "center" if "center" in self.flags else "normal"   # B1 opening: center -> transit -> normal
         self.center_spot = None
@@ -479,6 +501,10 @@ class Bot:
                     # it's looking at us from range and we don't clearly outgun it: back off into cover, facing it
                     shy = True
                     losing = True
+            if "endgame" in self.flags and self.stage != "early" and not bold:
+                # B7: from mid-game, bank HP for the last circles: break off sooner
+                if hp_frac < P["end_flee_hp1"] or (hp_frac < P["end_flee_hp2"] and target["hp"] > me["hp"]):
+                    losing = True
             tag = "!" if bold else ("?" if shy else "")
             if losing:
                 self.flee_until = t + P["flee_hold"]
@@ -501,7 +527,7 @@ class Bot:
             else:
                 radial = 0.0
                 if target["d"] > want_hi:
-                    radial = P["radial"]
+                    radial = 0.0 if ("endgame" in self.flags and self.stage == "late") else P["radial"]   # B7: don't chase late
                 elif target["d"] < want_lo:
                     radial = -P["radial"]
                 move = (px + bx * radial, py + by * radial)
@@ -695,17 +721,19 @@ class Bot:
             if self.blacklist.get(c["id"], 0) > t:
                 continue
             d = d2(c["pos"], (x, y))
-            if d < P["loot_c_range"] * lr and inzone(c["pos"]) and reachable(c["pos"]):
+            cm = 1.6 if ("endgame" in self.flags and self.stage != "early") else 1.0   # B7: cubes are HP for the end
+            if d < P["loot_c_range"] * lr * cm and inzone(c["pos"]) and reachable(c["pos"]):
                 sc = d - P["loot_c_bonus"]
                 if best is None or sc < best[0]:
                     best = (sc, c["pos"][0], c["pos"][1], "cube")
         # supply drops
         for dr in obs.get("drops", []):
             d = d2(dr["pos"], (x, y))
-            if d < 160 and dr["lands_in"] < d / 11 + 3 and hp_frac > 0.3:
+            eg = "endgame" in self.flags   # B7: a drop is full HP + energy + 3 cubes: go further, even when hurt
+            if d < (260 if eg else 160) and dr["lands_in"] < d / 11 + 3 and hp_frac > (0.15 if eg else 0.3):
                 if dr.get("holder") not in (None, me["id"]) and dr.get("progress", 0) > 2:
                     continue
-                sc = d - 40
+                sc = d - (140 if eg else 40)
                 if best is None or sc < best[0]:
                     best = (sc, dr["pos"][0], dr["pos"][1], "drop")
         if best is not None:
