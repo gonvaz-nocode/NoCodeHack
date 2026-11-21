@@ -39,6 +39,9 @@ PARAMS = {
     "gun_maxd_early": 110.0, "gun_maxd_mid": 170.0, "gun_maxd_late": 230.0,
     "gun_phit_early": 0.45, "gun_phit_mid": 0.30, "gun_phit_late": 0.15,
     "gun_reload_early": 0.75, "gun_reload_mid": 0.5, "gun_reload_late": 0.34,
+    # B2/B3 "phased": hide + loot ("build") then hunt. Practice: hunt from ph_prac_t s, or once we hold a second real
+    # weapon and ph_prac_cubes cubes. Free-for-all: hunt once ph_ffa_alive or fewer mechs remain, or in the late stage.
+    "ph_prac_t": 45.0, "ph_prac_cubes": 2.0, "ph_ffa_alive": 6.0, "ph_loot_w": 1.3,
 }
 
 # Named versions -> behaviour switches. A1 is the original v1 (git commit f2c923f), not reproducible by switches.
@@ -53,8 +56,11 @@ VERSIONS = {
     "A8": "ambush,creep",         # hide more; attack only lone mechs facing away
     "A9": "gunwise",              # stage-aware gun use
     "B1": "center",               # walk to a half-sheltered spot near the map centre, then to the zone through cover
+    "B2": "phased,gunwise",       # A9 guns; hide + loot to grow while others thin out, then turn aggressive (when depends
+                                  # on whether this is practice or a free-for-all, detected from who is killing whom)
+    "B3": "phased,switch,gunwise",  # A9 guns; aggressive in practice, A8-style hiding for the rest of a free-for-all
 }
-DEFAULT_VERSION = "A5"
+DEFAULT_VERSION = "B2"
 
 
 def load_params():
@@ -122,6 +128,13 @@ class Bot:
         self.phase = "center" if "center" in self.flags else "normal"   # B1 opening: center -> transit -> normal
         self.center_spot = None
         self.stage = "early"
+        # B2/B3: is this a free-for-all? Practice house bots never kill each other, so any death we didn't cause
+        # (zone deaths aside) means other mechs are fighting each other.
+        self.base_flags = set(self.flags)
+        self.my_kills = 0
+        self.ffa = False
+        self.plan = "hunt" if "switch" in self.flags else "build"
+        self._cover_cache = None
         self.contact_t = -99.0   # last time an enemy was seen within 70 m or heard near
         self.threat_bearing = None
         self.threat_until = 0.0
@@ -282,6 +295,8 @@ class Bot:
                 self.threat_until = t + 2.5
                 if e.get("by") is not None:
                     self.attackers[e["by"]] = t
+            elif e["type"] == "kill":
+                self.my_kills += 1
             elif e["type"] == "take_failed":
                 self.blacklist[e["id"]] = t + 20
         for s in obs.get("sounds", []):
@@ -313,6 +328,9 @@ class Bot:
             a = random.random() * TAU
             self.unstick_dir = (math.cos(a), math.sin(a))
             self.stuck_ticks = 0
+
+        if "phased" in self.base_flags:
+            self.update_plan(obs, me, kinds, t)
 
         # ---- zone
         cur_c, cur_r, nc, nr, ss, se = self.zone_info(obs)
@@ -575,10 +593,34 @@ class Bot:
         if g and g["reload"] == 0 and g["ammo"] < g["stats"]["mag"] * rfrac and not any(fire) and mode not in ("fight", "flee"):
             act["reload"] = True
         self.last_mode = mode
-        mf.draw.label(f"{mode}{tag}{'~' if crept else ''} hp{me['hp']:.0f} e{me['energy']:.0f}")
+        plan = ("F" if self.ffa else "P") + ("b" if self.plan == "build" else "h") if "phased" in self.base_flags else ""
+        mf.draw.label(f"{plan}{' ' if plan else ''}{mode}{tag}{'~' if crept else ''} hp{me['hp']:.0f} e{me['energy']:.0f}")
         return act
 
     # ------------------------------------------------------------------ sub-behaviours
+    def update_plan(self, obs, me, kinds, t):
+        """B2/B3: decide between 'build' (hide, loot, grow) and 'hunt' (normal aggressive play) for this tick."""
+        P = self.P
+        total = self.cfg.get("match", {}).get("mechs", 16)
+        alive = obs.get("alive", total)
+        others_died = (total - alive) - self.my_kills
+        # practice house bots never kill each other: deaths we didn't cause, before the zone could have done it, mean
+        # other mechs are fighting each other (free-for-all). Later, require two to allow for zone deaths.
+        if not self.ffa and others_died >= (1 if t < 100 else 2):
+            self.ffa = True
+        if "switch" in self.base_flags:
+            self.plan = "build" if self.ffa else "hunt"          # B3: A8-style hiding for the rest of a free-for-all
+        elif self.ffa:
+            self.plan = "hunt" if (alive <= P["ph_ffa_alive"] or self.stage == "late") else "build"
+        elif self.plan == "build":
+            second = any(k and k != "gun" for k in kinds) and all(kinds)
+            if t >= P["ph_prac_t"] or (second and me.get("cubes", 0) >= P["ph_prac_cubes"]):
+                self.plan = "hunt"
+        extra = set()
+        if self.plan == "build":
+            extra = {"ambush", "creep"} | (set() if "switch" in self.base_flags else {"buildloot"})
+        self.flags = self.base_flags | extra
+
     def opening(self, me, t, in_zone, dcur, cur_r, dnext, nr, margin, goal, mode):
         """B1: first walk to a half-sheltered spot near the map centre, then to the zone through cover, then normal play."""
         x, y = me["pos"][0], me["pos"][1]
@@ -624,6 +666,9 @@ class Bot:
         best = None
         P = self.P
         lr = 0.5 if "ambush" in self.flags else 1.0   # A8 hides more: loot only what is close
+        lw = 1.0
+        if "buildloot" in self.flags:   # B2 build phase: hide, but loot fully (further for weapons) to grow
+            lr, lw = 1.0, P["ph_loot_w"]
 
         def inzone(p, pad=15):
             return d2(p, cur_c) < cur_r - pad
@@ -641,7 +686,7 @@ class Bot:
             if kinds[1] is not None and r <= worst:
                 continue
             d = d2(p["pos"], (x, y))
-            if d < P["loot_w_range"] * lr and inzone(p["pos"]) and reachable(p["pos"]):
+            if d < P["loot_w_range"] * lr * lw and inzone(p["pos"]) and reachable(p["pos"]):
                 sc = d - r * P["loot_w_rank"]
                 if best is None or sc < best[0]:
                     best = (sc, p["pos"][0], p["pos"][1], "weapon")
@@ -679,6 +724,8 @@ class Bot:
         crates_ok = hp_frac > P["crate_hp"]
         if "ambush" in self.flags:
             crates_ok = hp_frac > 0.9
+        if "buildloot" in self.flags:   # shoot crates only while no mech can see or hear-locate us nearby
+            crates_ok = hp_frac > P["crate_hp"] and not any(m["kind"] == "mech" for m in obs.get("mechs", []))
         if "gunwise" in self.flags and self.stage == "late":
             crates_ok = False   # late game: no gunfire just for loot
         if crates_ok:
@@ -723,6 +770,20 @@ class Bot:
 
     def cover_from(self, me, enemies):
         """A nearby walkable spot with no line of sight from any of the enemies."""
+        g = self.geo
+        x, y, z = me["pos"]
+        if not (self.base_flags & {"phased", "ambush"}):   # submitted versions keep their exact behaviour
+            return self._cover_search(me, enemies)
+        enemies = sorted(enemies, key=lambda m: m.get("d", 0))[:3]
+        ck = tuple(sorted(m.get("id", -1) for m in enemies))
+        cc = self._cover_cache
+        if cc and cc[1] == ck and self.t_now - cc[0] < 0.4 and d2((x, y), cc[2]) < 3:
+            return cc[3]
+        res = self._cover_search(me, enemies)
+        self._cover_cache = (self.t_now, ck, (x, y), res)
+        return res
+
+    def _cover_search(self, me, enemies):
         g = self.geo
         x, y, z = me["pos"]
         best = None
